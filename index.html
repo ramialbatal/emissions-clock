@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CO₂ Emissions Clock</title>
+  <meta name="description" content="Real-time estimate of fossil CO₂ emissions for the world and major emitting countries, based on official annual data.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>CO₂ Emissions Clock</h1>
+      <p class="sub">Fossil CO₂ emitted so far in <span data-year></span> — estimated live, second by second</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" aria-label="World total">
+      <p class="label">🌍 World · year to date</p>
+      <div class="big" id="world-num" aria-live="off">0</div>
+      <p class="unit">tonnes of CO₂</p>
+      <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
+      <ul class="stats">
+        <li><b id="world-rate">0</b><span>tonnes per second</span></li>
+        <li><b id="world-since">0</b><span>tonnes since you opened this page</span></li>
+        <li><b><span id="world-pct">0</span>%</b><span>of the year's projected <span id="world-annual"></span> Gt</span></li>
+      </ul>
+    </section>
+
+    <section aria-label="Countries">
+      <div class="bar-head">
+        <h2>Major emitters</h2>
+        <label>Sort by
+          <select id="sort">
+            <option value="total">Total emissions</option>
+            <option value="percap">Per person</option>
+            <option value="growth">Growth trend</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="method">
+      <h2>How this is calculated</h2>
+      <p>Official inventories report emissions <em>per year</em>, not per second. This clock takes the latest
+        annual figure (base year <span id="base-year"></span>), projects it to <span data-year></span> using a
+        recent average growth rate, and spreads it evenly over the year:</p>
+      <pre>annual = base × (1 + growth)<sup>(year − base year)</sup>
+per second = annual ÷ seconds in year
+so far = annual × fraction of the year elapsed (UTC)</pre>
+      <p>Real emissions vary by season, weekday and time of day, so the live numbers are a model, not a measurement.
+        Figures cover fossil fuels and cement; land-use change is excluded. Germany is shown separately but is
+        also included in the EU total.</p>
+      <p class="src">Data: <span id="source"></span>. See
+        <a href="https://globalcarbonbudget.org/" rel="noopener">globalcarbonbudget.org</a>,
+        <a href="https://edgar.jrc.ec.europa.eu/" rel="noopener">EDGAR</a> and
+        <a href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>.</p>
+    </section>
+  </main>
+
+  <footer class="wrap foot">Estimates only · update <code>js/data.js</code> when new official figures are released.</footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
