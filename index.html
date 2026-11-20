@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CO₂ Emissions Clock</title>
-  <meta name="description" content="Real-time estimate of fossil CO₂ emissions for the world and major emitting countries, based on official annual data.">
+  <meta name="description" content="Real-time estimate of fossil CO₂ emissions for the world and major emitting countries, based on the Global Carbon Budget.">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-state="loading">
   <header class="top">
     <div class="wrap">
       <h1>CO₂ Emissions Clock</h1>
@@ -15,17 +15,31 @@
     </div>
   </header>
 
-  <main class="wrap">
+  <div class="status loading-only" role="status">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Getting the latest official data…</p>
+    <p class="hint">Global Carbon Budget via Our World in Data</p>
+  </div>
+
+  <div class="status error-only" role="alert">
+    <p><strong>Couldn't load the emissions data.</strong></p>
+    <p class="hint" id="error-msg"></p>
+    <button id="retry" type="button">Try again</button>
+  </div>
+
+  <main class="wrap ready-only">
     <section class="hero" aria-label="World total">
       <p class="label">🌍 World · year to date</p>
-      <div class="big" id="world-num" aria-live="off">0</div>
+      <div class="big" id="world-num">0</div>
       <p class="unit">tonnes of CO₂</p>
       <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
       <ul class="stats">
         <li><b id="world-rate">0</b><span>tonnes per second</span></li>
         <li><b id="world-since">0</b><span>tonnes since you opened this page</span></li>
-        <li><b><span id="world-pct">0</span>%</b><span>of the year's projected <span id="world-annual"></span> Gt</span></li>
+        <li><b><i id="world-pct">0</i>%</b><span>of <span data-year></span>'s projected <span id="world-annual"></span> Gt</span></li>
       </ul>
+      <p class="basis">Based on <b id="world-official"></b> Gt officially reported for <span data-latest></span>,
+        trending <b id="world-growth"></b>/yr since <span data-trend-from></span>.</p>
     </section>
 
     <section aria-label="Countries">
@@ -45,25 +59,26 @@
 
     <section class="method">
       <h2>How this is calculated</h2>
-      <p>Official inventories report emissions <em>per year</em>, not per second. This clock takes the latest
-        annual figure (base year <span id="base-year"></span>), projects it to <span data-year></span> using a
-        recent average growth rate, and spreads it evenly over the year:</p>
-      <pre>annual = base × (1 + growth)<sup>(year − base year)</sup>
-per second = annual ÷ seconds in year
-so far = annual × fraction of the year elapsed (UTC)</pre>
-      <p>Real emissions vary by season, weekday and time of day, so the live numbers are a model, not a measurement.
-        Figures cover fossil fuels and cement; land-use change is excluded. Germany is shown separately but is
-        also included in the EU total.</p>
-      <p class="src">Data: <span id="source"></span>. See
-        <a href="https://globalcarbonbudget.org/" rel="noopener">globalcarbonbudget.org</a>,
-        <a href="https://edgar.jrc.ec.europa.eu/" rel="noopener">EDGAR</a> and
-        <a href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>.</p>
+      <p>Official inventories report emissions <em>per year</em>, not per second. When this page opens it downloads the
+        latest annual figures (currently up to <span data-latest></span>), projects them to <span data-year></span>
+        using each country's average annual change since <span data-trend-from></span>, and spreads the result evenly
+        over the year:</p>
+      <pre>growth   = (E[latest] / E[latest − 3])^(1/3) − 1
+annual   = E[latest] × (1 + growth)^(this year − latest)
+per sec  = annual ÷ seconds in this year
+so far   = annual × fraction of the year elapsed (UTC)</pre>
+      <p>Real emissions vary by season, weekday and time of day, so the live counters are a model, not a measurement.
+        Figures are territorial fossil CO₂ including cement; land-use change is excluded, and international aviation
+        and shipping only appear in the world total. Germany is shown separately but is also part of the EU.</p>
+      <p class="src">Data: Global Carbon Project, <em>Global Carbon Budget</em>, fetched live from
+        <a href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>
+        at <span id="fetched-at"></span>. More: <a href="https://globalcarbonbudget.org/" rel="noopener">globalcarbonbudget.org</a>.</p>
     </section>
   </main>
 
-  <footer class="wrap foot">Estimates only · update <code>js/data.js</code> when new official figures are released.</footer>
+  <footer class="wrap foot">Estimates only · data is pulled fresh on every visit; no server required.</footer>
 
-  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
