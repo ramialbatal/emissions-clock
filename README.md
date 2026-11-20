@@ -16,6 +16,6 @@ Countries, source URLs and the trend window are set in `js/config.js`.
 
 ## Method
 
-The latest reported year is projected to the current year using each country's average annual change over the
-last 3 years. That total is spread evenly across the year, so the counters show year-to-date emissions ticking in real time.
+The latest reported year is projected to the current year using each country's latest year-on-year change
+(`trendYears` in `js/config.js`; set it higher to average over several years). That total is spread evenly across the year, so the counters show year-to-date emissions ticking in real time.
 This is a model, not a live measurement.

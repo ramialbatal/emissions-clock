@@ -16,7 +16,7 @@ window.CO2_CONFIG = {
   },
   sourceUrl: "https://ourworldindata.org/co2-emissions",
   historyFrom: 2015,   // first year fetched
-  trendYears: 3,       // growth trend = average annual change over the last N years of data
+  trendYears: 1,       // growth trend = average annual change over the last N years (1 = latest year-on-year change)
   world: "OWID_WRL",
   countries: [
     { code: "CHN", flag: "🇨🇳" },
