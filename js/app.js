@@ -259,7 +259,7 @@
   function applyGasLabels(key) {
     const gas = CFG.gases[key];
     document.body.dataset.gas = key;
-    document.title = `${gas.label} Emissions Clock`;
+    document.title = `Live ${gas.label} Emissions Clock – World and Countries in Real Time`;
     document.querySelectorAll("[data-gas-label]").forEach((el) => (el.textContent = gas.label));
     document.querySelectorAll("[data-gas-long]").forEach((el) => (el.textContent = gas.long));
     document.querySelectorAll("[data-gas-unit]").forEach((el) => (el.textContent = gas.unitLong));

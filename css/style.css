@@ -230,3 +230,5 @@ dialog#help[open] { animation: pop .22s ease-out; }
   .sheet { padding: 18px 16px calc(16px + env(safe-area-inset-bottom)); }
 }
 .dg-pill { fill: #0d1211; stroke: var(--accent); stroke-opacity: .5; }
+.foot p { margin: 4px 0; }
+.foot strong { color: var(--text); }

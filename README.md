@@ -1,5 +1,7 @@
 # Emissions Clock
 
+**Live site: https://ramialbatal.github.io/emissions-clock/**
+
 A static, real-time "debt clock" style page estimating **CO₂** and **methane** emissions for the world and major emitters.
 A switch at the top changes gas. `#methane` in the URL opens the methane view directly.
 

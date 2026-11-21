@@ -3,10 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Emissions Clock</title>
+  <title>Live CO₂ &amp; Methane Emissions Clock – World and Countries in Real Time</title>
+  <meta name="description" content="Watch global CO₂ and methane emissions rise second by second. A live emissions clock for the world, China, the US, India, the EU and other major emitters, based on official Global Carbon Budget data.">
+  <meta name="keywords" content="CO2 emissions, carbon emissions, methane emissions, emissions clock, live CO2 counter, greenhouse gases, climate change, carbon dioxide by country, Global Carbon Budget">
+  <link rel="canonical" href="https://ramialbatal.github.io/emissions-clock/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0b0f0e">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Emissions Clock">
+  <meta property="og:title" content="Live CO₂ &amp; Methane Emissions Clock">
+  <meta property="og:description" content="Global and national greenhouse gas emissions, ticking in real time — based on official annual data.">
+  <meta property="og:url" content="https://ramialbatal.github.io/emissions-clock/">
+  <meta property="og:image" content="https://ramialbatal.github.io/emissions-clock/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Emissions Clock showing world CO₂ emitted so far this year">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Live CO₂ &amp; Methane Emissions Clock">
+  <meta name="twitter:description" content="Global and national greenhouse gas emissions, ticking in real time — based on official annual data.">
+  <meta name="twitter:image" content="https://ramialbatal.github.io/emissions-clock/img/og-image.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Emissions Clock",
+    "alternateName": "Live CO₂ and Methane Emissions Clock",
+    "url": "https://ramialbatal.github.io/emissions-clock/",
+    "description": "A real-time clock estimating carbon dioxide (CO₂) and methane emissions so far this year for the world and major emitting countries, projected from official annual data.",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any (web browser)",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "inLanguage": "en",
+    "keywords": "CO2 emissions, methane emissions, carbon emissions by country, greenhouse gases, climate change",
+    "about": [
+      { "@type": "Thing", "name": "Carbon dioxide emissions" },
+      { "@type": "Thing", "name": "Methane emissions" },
+      { "@type": "Thing", "name": "Climate change" }
+    ],
+    "isBasedOn": [
+      { "@type": "Dataset", "name": "Global Carbon Budget", "creator": { "@type": "Organization", "name": "Global Carbon Project" }, "url": "https://globalcarbonbudget.org/" },
+      { "@type": "Dataset", "name": "National contributions to climate change", "creator": { "@type": "Person", "name": "Matthew W. Jones" }, "url": "https://ourworldindata.org/methane-emissions" }
+    ]
+  }
+  </script>
   <meta http-equiv="Cache-Control" content="no-cache">
-  <meta name="description" content="Real-time estimate of CO₂ and methane emissions for the world and major emitting countries, based on official annual data.">
-  <link rel="stylesheet" href="css/style.css?v=20261121g">
+  <link rel="stylesheet" href="css/style.css?v=20261121h">
 </head>
 <body data-state="loading" data-gas="co2">
   <header class="top">
@@ -24,6 +70,15 @@
       </div>
     </div>
   </header>
+
+  <noscript>
+    <div class="status">
+      <p><strong>This live clock needs JavaScript.</strong></p>
+      <p class="hint">It estimates carbon dioxide (CO₂) and methane emissions so far this year for the world and major
+        emitters — China, the United States, India, the European Union, Russia, Japan and more — by projecting the latest
+        official annual figures (Global Carbon Budget; Jones et al.) and spreading them evenly over the year.</p>
+    </div>
+  </noscript>
 
   <div class="status loading-only" role="status">
     <div class="spinner" aria-hidden="true"></div>
@@ -192,9 +247,14 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
     </div>
   </dialog>
 
-  <footer class="wrap foot">Estimates only · data is pulled fresh on every visit; no server required.</footer>
+  <footer class="wrap foot">
+    <p><strong>Emissions Clock</strong> estimates how much carbon dioxide (CO₂) and methane the world and the biggest
+      emitting countries have released so far this year, updated every second from official annual data.</p>
+    <p>Estimates only · data is pulled fresh on every visit ·
+      <a href="https://github.com/ramialbatal/emissions-clock" rel="noopener">Source code</a></p>
+  </footer>
 
-  <script src="js/config.js?v=20261121g"></script>
-  <script src="js/app.js?v=20261121g"></script>
+  <script src="js/config.js?v=20261121h"></script>
+  <script src="js/app.js?v=20261121h"></script>
 </body>
 </html>
