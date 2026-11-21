@@ -131,3 +131,25 @@ button.more:hover, button.more:focus-visible { border-color: var(--accent-2); ou
 button.more span { display: inline-block; transition: transform .2s; }
 button.more.open span { transform: rotate(180deg); }
 .history { margin-top: 10px; border-top: 0; padding-top: 0; }
+
+/* ---- Gas switch ---- */
+.gas-switch {
+  display: inline-flex; margin-top: 18px; padding: 4px; gap: 4px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+}
+.gas-switch button {
+  margin: 0; padding: 8px 20px; min-width: 110px; border-radius: 999px;
+  background: transparent; color: var(--muted); font-weight: 600;
+  -webkit-tap-highlight-color: transparent; transition: background .2s, color .2s;
+}
+.gas-switch button[aria-pressed="true"] { background: var(--accent); color: #120a06; }
+.gas-switch button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+
+/* Methane gets its own colour so the two views are easy to tell apart */
+body[data-gas="ch4"] {
+  --accent: #b388ff;
+  --accent-2: #d4bcff;
+  background: radial-gradient(1200px 600px at 50% -200px, #1f1530 0%, var(--bg) 60%) fixed, var(--bg);
+}
+body[data-gas="ch4"] .big { text-shadow: 0 0 28px rgba(179,136,255,.35); }
+body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; }

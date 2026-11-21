@@ -13,7 +13,7 @@
   // ---- Fetching ------------------------------------------------------------
   function chartUrl(slug, codes) {
     const q = new URLSearchParams({
-      v: "1", csvType: "filtered", useColumnShortNames: "true",
+      v: "1", csvType: "filtered", useColumnShortNames: "true", tab: "chart",
       time: `${CFG.historyFrom}..latest`
     });
     // OWID expects "~CODE1~CODE2"; build manually so "~" isn't percent-encoded.
@@ -60,16 +60,19 @@
     return parseCsv(await res.text());
   }
 
-  async function loadData() {
+  const cache = {};
+  async function loadData(gasKey) {
+    if (cache[gasKey]) return cache[gasKey];
+    const gas = CFG.gases[gasKey];
     const codes = [CFG.world, ...CFG.countries.map((c) => c.code)];
     const [totalRows, pcRows] = await Promise.all([
-      fetchCsv(chartUrl(CFG.charts.total, codes)),
-      fetchCsv(chartUrl(CFG.charts.perCapita, codes))
+      fetchCsv(chartUrl(gas.total.chart, codes)),
+      fetchCsv(chartUrl(gas.perCapita.chart, codes))
     ]);
-    const total = indexByCode(totalRows, "emissions_total");
-    const perCap = indexByCode(pcRows, "emissions_total_per_capita");
+    const total = indexByCode(totalRows, gas.total.column);
+    const perCap = indexByCode(pcRows, gas.perCapita.column);
     if (!total[CFG.world]) throw new Error("World total missing from response");
-    return { total, perCap };
+    return (cache[gasKey] = { total, perCap, fetchedAt: new Date() });
   }
 
   // ---- Model ---------------------------------------------------------------
@@ -88,6 +91,11 @@
   const yearFraction = (now) => (now - Date.UTC(YEAR, 0, 1)) / MS_PER_YEAR(YEAR);
 
   // ---- Rendering -----------------------------------------------------------
+  // 12.42 Gt / 573 Mt / 48.2 Mt — keeps small methane figures readable
+  function mass(t) {
+    if (Math.abs(t) >= 1e9) return fmt2.format(t / 1e9) + " Gt";
+    return (Math.abs(t) >= 1e8 ? fmt0 : fmt1).format(t / 1e6) + " Mt";
+  }
   const digits = (s) => s.replace(/[0-9]/g, (d) => `<span class="d">${d}</span>`);
 
   function sparkline(e) {
@@ -113,13 +121,17 @@
     const rows = e.years.slice().reverse().map((y, i, arr) => {
       const prev = e.series[y - 1];
       const ch = prev ? (e.series[y] / prev - 1) * 100 : null;
-      return `<tr><th>${y}</th><td>${fmt2.format(e.series[y] / 1e9)} Gt</td><td class="${
+      return `<tr><th>${y}</th><td>${mass(e.series[y])}</td><td class="${
         ch > 0 ? "up" : ch < 0 ? "down" : ""}">${ch == null ? "" : (ch > 0 ? "+" : "") + fmt1.format(ch) + "%"}</td></tr>`;
     }).join("");
     return `<div class="history" hidden><table><caption>Official annual emissions</caption>${rows}</table></div>`;
   }
 
-  function render(data) {
+  const T0 = Date.now();   // page-open time, shared by both gases
+  let loopId = 0;          // bumps on every render so the old clock loop stops
+
+  function render(data, gas) {
+    const myLoop = ++loopId;
     const world = buildEntry(data.total[CFG.world].series, CFG.trendYears);
     const wRate = perSecond(world.annual);
 
@@ -170,13 +182,13 @@
           ${e.partOf ? `<span class="tag">part of ${e.partOf}</span>` : ""}
           ${e.series ? sparkline(e) : ""}
         </header>
-        <div class="ytd"><span class="num">0</span> <small>t CO₂ in ${YEAR}</small></div>
+        <div class="ytd"><span class="num">0</span> <small>${gas.unit} in ${YEAR}</small></div>
         <div class="bar" title="${fmt1.format(share)}% of world"><i style="width:${Math.min(share * 2.5, 100)}%"></i></div>
         <dl>
           <div><dt>Share of world</dt><dd>${fmt1.format(share)}%</dd></div>
-          <div><dt>Per second</dt><dd>${fmt0.format(perSecond(e.annual))} t</dd></div>
-          <div><dt>${e.lastYear} official</dt><dd>${fmt2.format(e.lastValue / 1e9)} Gt</dd></div>
-          <div><dt>${YEAR} projected</dt><dd>${fmt2.format(e.annual / 1e9)} Gt</dd></div>
+          <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt1 : fmt0).format(perSecond(e.annual))} t</dd></div>
+          <div><dt>${e.lastYear} official</dt><dd>${mass(e.lastValue)}</dd></div>
+          <div><dt>${YEAR} projected</dt><dd>${mass(e.annual)}</dd></div>
           <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt1.format(e.perCap) + " t" : "—"}</dd></div>
           <div><dt>Trend / yr</dt><dd class="${g > 0 ? "up" : g < 0 ? "down" : ""}">${
             g == null ? "—" : (g > 0 ? "▲ +" : g < 0 ? "▼ " : "") + fmt1.format(g * 100) + "%"}</dd></div>
@@ -219,12 +231,12 @@
     sortCards();
 
     // Clock loop
-    const t0 = Date.now();
     let lastWorld = "";
     (function tick() {
+      if (myLoop !== loopId) return;
       const now = Date.now();
       const frac = yearFraction(now);
-      const elapsed = (now - t0) / 1000;
+      const elapsed = (now - T0) / 1000;
       const ws = fmt0.format(world.annual * frac);
       if (ws !== lastWorld) { $("world-num").innerHTML = digits(ws); lastWorld = ws; }
       $("world-since").textContent = fmt0.format(wRate * elapsed);
@@ -238,26 +250,53 @@
     })();
   }
 
-  // ---- Boot ----------------------------------------------------------------
+  // ---- Boot / gas switching ---------------------------------------------
   function setState(state, msg) {
     document.body.dataset.state = state;
     if (msg) $("error-msg").textContent = msg;
   }
 
-  async function start() {
-    setState("loading");
+  function applyGasLabels(key) {
+    const gas = CFG.gases[key];
+    document.body.dataset.gas = key;
+    document.title = `${gas.label} Emissions Clock`;
+    document.querySelectorAll("[data-gas-label]").forEach((el) => (el.textContent = gas.label));
+    document.querySelectorAll("[data-gas-long]").forEach((el) => (el.textContent = gas.long));
+    document.querySelectorAll("[data-gas-unit]").forEach((el) => (el.textContent = gas.unitLong));
+    document.querySelectorAll("[data-gas-source]").forEach((el) => (el.textContent = gas.source));
+    document.querySelectorAll("[data-gas-source-url]").forEach((el) => (el.href = gas.sourceUrl));
+    document.querySelectorAll(".gas-switch button").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.gas === key)));
+  }
+
+  let current = null;
+  async function show(key) {
+    if (!CFG.gases[key]) key = CFG.defaultGas;
+    current = key;
+    applyGasLabels(key);
+    if (!cache[key]) { loopId++; setState("loading"); }
     try {
-      const data = await loadData();
-      render(data);
-      $("fetched-at").textContent = new Date().toLocaleString();
+      const data = await loadData(key);
+      if (current !== key) return;  // user switched again while loading
+      render(data, CFG.gases[key]);
+      $("fetched-at").textContent = data.fetchedAt.toLocaleString();
       setState("ready");
     } catch (err) {
+      if (current !== key) return;
       console.error(err);
       setState("error", err.message || String(err));
     }
   }
 
+  const fromHash = () => (location.hash === "#methane" ? "ch4" : "co2");
+  document.querySelectorAll(".gas-switch button").forEach((b) =>
+    b.addEventListener("click", () => {
+      const hash = b.dataset.gas === "ch4" ? "#methane" : "";
+      history.replaceState(null, "", location.pathname + location.search + hash);
+      show(b.dataset.gas);
+    }));
+  window.addEventListener("hashchange", () => show(fromHash()));
   document.querySelectorAll("[data-year]").forEach((el) => (el.textContent = YEAR));
-  $("retry").addEventListener("click", start);
-  start();
+  $("retry").addEventListener("click", () => show(current));
+  show(fromHash());
 })();

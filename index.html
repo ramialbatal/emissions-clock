@@ -3,23 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CO₂ Emissions Clock</title>
+  <title>Emissions Clock</title>
   <meta http-equiv="Cache-Control" content="no-cache">
-  <meta name="description" content="Real-time estimate of fossil CO₂ emissions for the world and major emitting countries, based on the Global Carbon Budget.">
-  <link rel="stylesheet" href="css/style.css?v=20261121">
+  <meta name="description" content="Real-time estimate of CO₂ and methane emissions for the world and major emitting countries, based on official annual data.">
+  <link rel="stylesheet" href="css/style.css?v=20261121b">
 </head>
-<body data-state="loading">
+<body data-state="loading" data-gas="co2">
   <header class="top">
     <div class="wrap">
-      <h1>CO₂ Emissions Clock</h1>
-      <p class="sub">Fossil CO₂ emitted so far in <span data-year></span> — estimated live, second by second</p>
+      <h1><span data-gas-label>CO₂</span> Emissions Clock</h1>
+      <p class="sub">Emitted so far in <span data-year></span> — estimated live, second by second</p>
+      <div class="gas-switch" role="group" aria-label="Choose greenhouse gas">
+        <button type="button" data-gas="co2" aria-pressed="true">CO₂</button>
+        <button type="button" data-gas="ch4" aria-pressed="false">Methane</button>
+      </div>
     </div>
   </header>
 
   <div class="status loading-only" role="status">
     <div class="spinner" aria-hidden="true"></div>
     <p>Getting the latest official data…</p>
-    <p class="hint">Global Carbon Budget via Our World in Data</p>
+    <p class="hint"><span data-gas-source></span>, via Our World in Data</p>
   </div>
 
   <div class="status error-only" role="alert">
@@ -30,9 +34,9 @@
 
   <main class="wrap ready-only">
     <section class="hero" aria-label="World total">
-      <p class="label">🌍 World · year to date</p>
+      <p class="label">🌍 World · <span data-gas-label></span> · year to date</p>
       <div class="big" id="world-num">0</div>
-      <p class="unit">tonnes of CO₂</p>
+      <p class="unit" data-gas-unit>tonnes of CO₂</p>
       <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
       <ul class="stats">
         <li><b id="world-rate">0</b><span>tonnes per second</span></li>
@@ -61,30 +65,40 @@
     <section class="method">
       <h2>How this is calculated</h2>
       <p>Official inventories report emissions <em>per year</em>, not per second. When this page opens it downloads the
-        latest annual figures (currently up to <span data-latest></span>), projects them to <span data-year></span>
-        using each country's latest year-on-year change (<span data-trend-from></span>→<span data-latest></span>), and spreads the result evenly
-        over the year:</p>
+        latest annual figures for <span data-gas-long></span> (currently up to <span data-latest></span>), projects them
+        to <span data-year></span> using each country's latest year-on-year change
+        (<span data-trend-from></span>→<span data-latest></span>), and spreads the result evenly over the year:</p>
       <pre>growth   = E[latest] / E[latest − 1] − 1
 annual   = E[latest] × (1 + growth)^(this year − latest)
 per sec  = annual ÷ seconds in this year
 so far   = annual × fraction of the year elapsed (UTC)</pre>
       <p>Real emissions vary by season, weekday and time of day, so the live counters are a model, not a measurement.
-        Figures are territorial fossil CO₂ including cement; land-use change is excluded, and international aviation
-        and shipping only appear in the world total. Germany is shown separately but is also part of the EU.</p>
+        Germany is shown separately but is also part of the EU.</p>
+
+      <p class="co2-only"><strong>What the CO₂ figures cover:</strong> territorial carbon dioxide from burning fossil fuels and
+        making cement. Land-use change (such as deforestation) is excluded, and international aviation and shipping only
+        appear in the world total.</p>
+      <p class="ch4-only"><strong>What the methane figures cover:</strong> methane (CH₄) from all human sources — fossil fuel
+        production and leaks, livestock, rice farming, landfills, and land use and fires. Tonnes of methane are converted to
+        <em>CO₂-equivalents</em> (CO₂e): the amount of CO₂ that would cause the same warming over 100 years (one tonne of
+        methane ≈ 27–30 t CO₂e). Methane only lasts about 12 years in the air but traps far more heat while it does, so cutting
+        it is the fastest way to slow warming in the near term. Official methane data is published with a longer delay than CO₂,
+        so its projection reaches further ahead.</p>
+
       <p>The small line chart on each card shows that country's official annual emissions from
         <span data-first></span> to <span data-latest></span>, with the dot marking the latest year and the
         percentage giving the change over the whole period. Each chart is scaled to its own minimum and maximum
         (it does not start at zero), so compare the shape of the trend rather than the heights between countries.
         Tap <em>Yearly data</em> (or the chart) to see the values for each year.</p>
-      <p class="src">Data: Global Carbon Project, <em>Global Carbon Budget</em>, fetched live from
-        <a href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>
-        at <span id="fetched-at"></span>. More: <a href="https://globalcarbonbudget.org/" rel="noopener">globalcarbonbudget.org</a>.</p>
+      <p class="src">Data: <span data-gas-source></span>, fetched live from
+        <a data-gas-source-url href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>
+        at <span id="fetched-at"></span>.</p>
     </section>
   </main>
 
   <footer class="wrap foot">Estimates only · data is pulled fresh on every visit; no server required.</footer>
 
-  <script src="js/config.js?v=20261121"></script>
-  <script src="js/app.js?v=20261121"></script>
+  <script src="js/config.js?v=20261121b"></script>
+  <script src="js/app.js?v=20261121b"></script>
 </body>
 </html>

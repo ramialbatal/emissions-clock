@@ -1,20 +1,34 @@
 /*
- * Which countries to show, and where the official data comes from.
+ * Which gases and countries to show, and where the official data comes from.
  *
  * Data is fetched live in the browser from Our World in Data's grapher API,
- * which republishes the Global Carbon Project's "Global Carbon Budget"
- * (fossil CO2 incl. cement, territorial, excl. land-use change).
- * The API sends `Access-Control-Allow-Origin: *`, so no server is needed.
+ * which sends `Access-Control-Allow-Origin: *`, so no server is needed.
+ *  - CO2: Global Carbon Project, "Global Carbon Budget"
+ *         (fossil fuels + cement, territorial, excl. land-use change)
+ *  - CH4: Jones et al., "National contributions to climate change"
+ *         (all sources incl. agriculture & land use, in CO2-equivalents)
  *
  * To add a country, add its ISO 3166-1 alpha-3 code (OWID uses OWID_* for aggregates).
  */
 window.CO2_CONFIG = {
   apiBase: "https://ourworldindata.org/grapher/",
-  charts: {
-    total: "annual-co2-emissions-per-country",   // tonnes CO2 / year
-    perCapita: "co-emissions-per-capita"          // tonnes CO2 / person / year
+  gases: {
+    co2: {
+      label: "CO₂", long: "carbon dioxide", unit: "t CO₂", unitLong: "tonnes of CO₂",
+      total:     { chart: "annual-co2-emissions-per-country", column: "emissions_total" },
+      perCapita: { chart: "co-emissions-per-capita", column: "emissions_total_per_capita" },
+      source: "Global Carbon Project, Global Carbon Budget",
+      sourceUrl: "https://ourworldindata.org/co2-emissions"
+    },
+    ch4: {
+      label: "Methane", long: "methane (CH₄)", unit: "t CO₂e", unitLong: "tonnes of CO₂-equivalent",
+      total:     { chart: "methane-emissions", column: "annual_emissions_ch4_total_co2eq" },
+      perCapita: { chart: "per-capita-methane-emissions", column: "annual_emissions_ch4_total_co2eq_per_capita" },
+      source: "Jones et al., National contributions to climate change",
+      sourceUrl: "https://ourworldindata.org/methane-emissions"
+    }
   },
-  sourceUrl: "https://ourworldindata.org/co2-emissions",
+  defaultGas: "co2",
   historyFrom: 2015,   // first year fetched
   trendYears: 1,       // growth trend = average annual change over the last N years (1 = latest year-on-year change)
   world: "OWID_WRL",
