@@ -263,6 +263,7 @@
     document.querySelectorAll("[data-gas-label]").forEach((el) => (el.textContent = gas.label));
     document.querySelectorAll("[data-gas-long]").forEach((el) => (el.textContent = gas.long));
     document.querySelectorAll("[data-gas-unit]").forEach((el) => (el.textContent = gas.unitLong));
+    document.querySelectorAll("[data-gas-note]").forEach((el) => (el.textContent = gas.note || ""));
     document.querySelectorAll("[data-gas-source]").forEach((el) => (el.textContent = gas.source));
     document.querySelectorAll("[data-gas-source-url]").forEach((el) => (el.href = gas.sourceUrl));
     document.querySelectorAll(".gas-switch button").forEach((b) =>

@@ -6,7 +6,7 @@
   <title>Emissions Clock</title>
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="description" content="Real-time estimate of CO₂ and methane emissions for the world and major emitting countries, based on official annual data.">
-  <link rel="stylesheet" href="css/style.css?v=20261121b">
+  <link rel="stylesheet" href="css/style.css?v=20261121d">
 </head>
 <body data-state="loading" data-gas="co2">
   <header class="top">
@@ -37,6 +37,7 @@
       <p class="label">🌍 World · <span data-gas-label></span> · year to date</p>
       <div class="big" id="world-num">0</div>
       <p class="unit" data-gas-unit>tonnes of CO₂</p>
+      <p class="gas-note ch4-only" data-gas-note></p>
       <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
       <ul class="stats">
         <li><b id="world-rate">0</b><span>tonnes per second</span></li>
@@ -98,7 +99,7 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
 
   <footer class="wrap foot">Estimates only · data is pulled fresh on every visit; no server required.</footer>
 
-  <script src="js/config.js?v=20261121b"></script>
-  <script src="js/app.js?v=20261121b"></script>
+  <script src="js/config.js?v=20261121d"></script>
+  <script src="js/app.js?v=20261121d"></script>
 </body>
 </html>

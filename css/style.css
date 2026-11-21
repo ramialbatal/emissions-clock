@@ -153,3 +153,6 @@ body[data-gas="ch4"] {
 }
 body[data-gas="ch4"] .big { text-shadow: 0 0 28px rgba(179,136,255,.35); }
 body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; }
+.gas-note { max-width: 520px; margin: -10px auto 18px; font-size: .82rem; color: var(--muted); }
+.ytd { white-space: normal; }
+.ytd small { white-space: nowrap; }

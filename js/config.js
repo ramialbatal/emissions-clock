@@ -21,7 +21,8 @@ window.CO2_CONFIG = {
       sourceUrl: "https://ourworldindata.org/co2-emissions"
     },
     ch4: {
-      label: "Methane", long: "methane (CH₄)", unit: "t CO₂e", unitLong: "tonnes of CO₂-equivalent",
+      label: "Methane", long: "methane (CH₄)", unit: "t CH₄ (CO₂-eq)", unitLong: "tonnes of methane, as CO₂-equivalent",
+      note: "Methane is counted in CO₂-equivalent: the CO₂ that would cause the same warming over 100 years. 1 t of methane ≈ 28 t CO₂-eq.",
       total:     { chart: "methane-emissions", column: "annual_emissions_ch4_total_co2eq" },
       perCapita: { chart: "per-capita-methane-emissions", column: "annual_emissions_ch4_total_co2eq_per_capita" },
       source: "Jones et al., National contributions to climate change",
