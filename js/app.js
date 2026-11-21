@@ -302,6 +302,7 @@
   document.querySelectorAll("[data-open-help]").forEach((b) => b.addEventListener("click", () => {
     if (help.showModal) help.showModal(); else help.setAttribute("open", "");
     help.querySelector(".sheet").scrollTop = 0;
+    help.querySelector(".close").focus({ preventScroll: true });
   }));
   const closeHelp = () => (help.close ? help.close() : help.removeAttribute("open"));
   document.querySelectorAll("[data-close-help]").forEach((b) => b.addEventListener("click", closeHelp));

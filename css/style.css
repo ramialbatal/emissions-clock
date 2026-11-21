@@ -176,21 +176,28 @@ body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; 
 
 dialog#help {
   padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); color: var(--text);
-  width: min(620px, calc(100% - 32px)); max-height: min(88vh, 900px); overflow: hidden;
+  width: min(620px, calc(100% - 32px)); max-height: min(88vh, 900px); max-height: min(88dvh, 900px); overflow: hidden;
 }
+dialog#help[open] { display: flex; flex-direction: column; }
 dialog#help::backdrop { background: rgba(0,0,0,.65); backdrop-filter: blur(2px); }
 dialog#help[open] { animation: pop .22s ease-out; }
 @keyframes pop { from { opacity: 0; transform: translateY(12px); } }
-.sheet { position: relative; padding: 22px 22px 18px; max-height: inherit; overflow-y: auto; overscroll-behavior: contain; }
-.sheet h2 { margin: 0 40px 12px 0; font-size: 1.35rem; }
+.sheet-head {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 14px 12px 22px; border-bottom: 1px solid var(--line); background: var(--panel);
+}
+.sheet-head h2 { margin: 0; font-size: 1.25rem; line-height: 1.25; }
+.sheet { flex: 1 1 auto; min-height: 0; padding: 18px 22px 18px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .sheet h3 { margin: 20px 0 6px; font-size: 1rem; color: var(--accent-2); }
 .sheet p { margin: 0 0 10px; color: #c6d1cd; }
 .sheet b { color: var(--text); }
 .close {
-  position: absolute; top: 12px; right: 12px; margin: 0; width: 36px; height: 36px; padding: 0; border-radius: 50%;
-  background: transparent; color: var(--muted); font-size: 1.6rem; line-height: 1; font-weight: 400;
+  flex: none; margin: 0; width: 40px; height: 40px; padding: 0; border-radius: 50%;
+  background: var(--line); color: var(--text); font-size: 1.6rem; line-height: 1; font-weight: 400;
 }
-.close:hover { color: var(--text); background: var(--line); }
+.close:hover { background: #33423d; }
+.close:focus { outline: none; }
+.close:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
 .done { display: block; width: 100%; margin-top: 18px; padding: 12px; }
 .analogy { background: #0d1211; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 
@@ -223,11 +230,12 @@ dialog#help[open] { animation: pop .22s ease-out; }
 @media (max-width: 640px) {
   dialog#help {
     width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 18px 18px 0 0; border-bottom: 0;
-    max-height: 90vh;
+    max-height: 90vh; max-height: 90dvh;
   }
+  .sheet-head { padding: 12px 12px 10px 16px; }
   dialog#help[open] { animation: slideup .25s ease-out; }
   @keyframes slideup { from { transform: translateY(40px); opacity: .4; } }
-  .sheet { padding: 18px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .sheet { padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
 }
 .dg-pill { fill: #0d1211; stroke: var(--accent); stroke-opacity: .5; }
 .foot p { margin: 4px 0; }
