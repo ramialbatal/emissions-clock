@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CO₂ Emissions Clock</title>
+  <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="description" content="Real-time estimate of fossil CO₂ emissions for the world and major emitting countries, based on the Global Carbon Budget.">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20261121">
 </head>
 <body data-state="loading">
   <header class="top">
@@ -74,7 +75,7 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
         <span data-first></span> to <span data-latest></span>, with the dot marking the latest year and the
         percentage giving the change over the whole period. Each chart is scaled to its own minimum and maximum
         (it does not start at zero), so compare the shape of the trend rather than the heights between countries.
-        Tap a chart to see the yearly values.</p>
+        Tap <em>Yearly data</em> (or the chart) to see the values for each year.</p>
       <p class="src">Data: Global Carbon Project, <em>Global Carbon Budget</em>, fetched live from
         <a href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>
         at <span id="fetched-at"></span>. More: <a href="https://globalcarbonbudget.org/" rel="noopener">globalcarbonbudget.org</a>.</p>
@@ -83,7 +84,7 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
 
   <footer class="wrap foot">Estimates only · data is pulled fresh on every visit; no server required.</footer>
 
-  <script src="js/config.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/config.js?v=20261121"></script>
+  <script src="js/app.js?v=20261121"></script>
 </body>
 </html>

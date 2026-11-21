@@ -115,7 +115,6 @@ button {
 dl .wide { grid-column: 1 / -1; }
 
 .spark-wrap { cursor: pointer; border-radius: 6px; }
-.spark-wrap:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
 .history { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
 .history table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .85rem; font-variant-numeric: tabular-nums; }
 .history caption { text-align: left; color: var(--muted); font-family: system-ui, sans-serif; font-size: .75rem; padding-bottom: 6px; }
@@ -123,3 +122,12 @@ dl .wide { grid-column: 1 / -1; }
 .history td { text-align: right; padding: 2px 0; }
 .history td.up { color: var(--bad); }
 .history td.down { color: var(--good); }
+button.more {
+  display: block; width: 100%; margin: 14px 0 0; padding: 8px 10px; text-align: center;
+  background: transparent; color: var(--accent-2); border: 1px solid var(--line); border-radius: 8px;
+  font-size: .85rem; font-weight: 600; -webkit-tap-highlight-color: transparent;
+}
+button.more:hover, button.more:focus-visible { border-color: var(--accent-2); outline: none; }
+button.more span { display: inline-block; transition: transform .2s; }
+button.more.open span { transform: rotate(180deg); }
+.history { margin-top: 10px; border-top: 0; padding-top: 0; }

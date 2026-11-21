@@ -99,7 +99,7 @@
     const [lx, ly] = xy[xy.length - 1];
     const first = ys[0], last = ys[ys.length - 1];
     const change = (vals[vals.length - 1] / vals[0] - 1) * 100;
-    return `<figure class="spark-wrap" role="button" tabindex="0" aria-expanded="false" title="Show yearly values">
+    return `<figure class="spark-wrap" title="Show yearly values">
       <svg class="spark" viewBox="-2 0 ${W + 4} ${H}" preserveAspectRatio="none" aria-hidden="true">
         <polyline points="${pts}"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.2"/>
       </svg>
@@ -182,18 +182,19 @@
             g == null ? "—" : (g > 0 ? "▲ +" : g < 0 ? "▼ " : "") + fmt1.format(g * 100) + "%"}</dd></div>
           <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
         </dl>
-        ${e.series ? historyTable(e) : ""}`;
+        ${e.series ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(e)}` : ""}`;
       const sw = el.querySelector(".spark-wrap");
-      if (sw) {
+      const btn = el.querySelector(".more");
+      if (btn) {
+        const h = el.querySelector(".history");
         const toggle = () => {
-          const h = el.querySelector(".history");
           h.hidden = !h.hidden;
-          sw.setAttribute("aria-expanded", String(!h.hidden));
+          btn.setAttribute("aria-expanded", String(!h.hidden));
+          btn.firstChild.textContent = h.hidden ? "Yearly data " : "Hide yearly data ";
+          btn.classList.toggle("open", !h.hidden);
         };
+        btn.addEventListener("click", toggle);
         sw.addEventListener("click", toggle);
-        sw.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(); }
-        });
       }
       grid.appendChild(el);
       return { e, el, num: el.querySelector(".num"), since: el.querySelector(".since"), rate: perSecond(e.annual) };
