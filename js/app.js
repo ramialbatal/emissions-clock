@@ -297,6 +297,16 @@
       show(b.dataset.gas);
     }));
   window.addEventListener("hashchange", () => show(fromHash()));
+  // Help pop-up
+  const help = $("help");
+  document.querySelectorAll("[data-open-help]").forEach((b) => b.addEventListener("click", () => {
+    if (help.showModal) help.showModal(); else help.setAttribute("open", "");
+    help.querySelector(".sheet").scrollTop = 0;
+  }));
+  const closeHelp = () => (help.close ? help.close() : help.removeAttribute("open"));
+  document.querySelectorAll("[data-close-help]").forEach((b) => b.addEventListener("click", closeHelp));
+  help.addEventListener("click", (e) => { if (e.target === help) closeHelp(); });  // tap outside
+
   document.querySelectorAll("[data-year]").forEach((el) => (el.textContent = YEAR));
   $("retry").addEventListener("click", () => show(current));
   show(fromHash());
