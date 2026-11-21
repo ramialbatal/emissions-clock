@@ -102,7 +102,24 @@ button {
 .stats i { font-style: normal; }
 .basis { margin: 18px 0 0; color: var(--muted); font-size: .9rem; }
 .basis b { color: var(--text); font-family: var(--mono); font-weight: 600; }
-.spark { margin-left: auto; width: 72px; height: 24px; flex: none; }
+.spark-wrap { margin: 0 0 0 auto; flex: none; text-align: right; }
+.tag + .spark-wrap { margin-left: 8px; }
+.spark { display: block; width: 84px; height: 24px; }
 .spark polyline { fill: none; stroke: var(--accent-2); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
-.tag + .spark { margin-left: 8px; }
+.spark circle { fill: var(--accent-2); }
+.spark-wrap figcaption { font-size: .68rem; color: var(--muted); font-family: var(--mono); line-height: 1.2; margin-top: 2px; white-space: nowrap; }
+.spark-wrap figcaption b { font-weight: 600; }
+.spark-wrap .up { color: var(--bad); }
+.spark-wrap .down { color: var(--good); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 dl .wide { grid-column: 1 / -1; }
+
+.spark-wrap { cursor: pointer; border-radius: 6px; }
+.spark-wrap:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.history { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.history table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.history caption { text-align: left; color: var(--muted); font-family: system-ui, sans-serif; font-size: .75rem; padding-bottom: 6px; }
+.history th { text-align: left; font-weight: 400; color: var(--muted); padding: 2px 0; }
+.history td { text-align: right; padding: 2px 0; }
+.history td.up { color: var(--bad); }
+.history td.down { color: var(--good); }

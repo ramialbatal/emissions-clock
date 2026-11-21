@@ -94,10 +94,29 @@
     const ys = e.years, vals = ys.map((y) => e.series[y]);
     const min = Math.min(...vals), max = Math.max(...vals), span = max - min || 1;
     const W = 120, H = 28;
-    const pts = vals.map((v, i) =>
-      `${((i / (vals.length - 1)) * W).toFixed(1)},${(H - 2 - ((v - min) / span) * (H - 4)).toFixed(1)}`).join(" ");
-    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img"
-      aria-label="Emissions ${ys[0]}–${ys[ys.length - 1]}"><polyline points="${pts}"/></svg>`;
+    const xy = vals.map((v, i) => [(i / (vals.length - 1)) * W, H - 3 - ((v - min) / span) * (H - 6)]);
+    const pts = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+    const [lx, ly] = xy[xy.length - 1];
+    const first = ys[0], last = ys[ys.length - 1];
+    const change = (vals[vals.length - 1] / vals[0] - 1) * 100;
+    return `<figure class="spark-wrap" role="button" tabindex="0" aria-expanded="false" title="Show yearly values">
+      <svg class="spark" viewBox="-2 0 ${W + 4} ${H}" preserveAspectRatio="none" aria-hidden="true">
+        <polyline points="${pts}"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.2"/>
+      </svg>
+      <figcaption>${first}–${last} <b class="${change > 0 ? "up" : change < 0 ? "down" : ""}">${
+        change > 0 ? "+" : ""}${fmt0.format(change)}%</b></figcaption>
+      <span class="sr-only">Annual emissions ${first} to ${last}</span>
+    </figure>`;
+  }
+
+  function historyTable(e) {
+    const rows = e.years.slice().reverse().map((y, i, arr) => {
+      const prev = e.series[y - 1];
+      const ch = prev ? (e.series[y] / prev - 1) * 100 : null;
+      return `<tr><th>${y}</th><td>${fmt2.format(e.series[y] / 1e9)} Gt</td><td class="${
+        ch > 0 ? "up" : ch < 0 ? "down" : ""}">${ch == null ? "" : (ch > 0 ? "+" : "") + fmt1.format(ch) + "%"}</td></tr>`;
+    }).join("");
+    return `<div class="history" hidden><table><caption>Official annual emissions</caption>${rows}</table></div>`;
   }
 
   function render(data) {
@@ -130,6 +149,7 @@
 
     // Header / methodology fill-ins
     document.querySelectorAll("[data-latest]").forEach((el) => (el.textContent = world.lastYear));
+    document.querySelectorAll("[data-first]").forEach((el) => (el.textContent = world.years[0]));
     document.querySelectorAll("[data-trend-from]").forEach((el) => (el.textContent = world.trendFrom));
     $("world-rate").textContent = fmt0.format(wRate);
     $("world-annual").textContent = fmt2.format(world.annual / 1e9);
@@ -161,7 +181,20 @@
           <div><dt>Trend / yr</dt><dd class="${g > 0 ? "up" : g < 0 ? "down" : ""}">${
             g == null ? "—" : (g > 0 ? "▲ +" : g < 0 ? "▼ " : "") + fmt1.format(g * 100) + "%"}</dd></div>
           <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
-        </dl>`;
+        </dl>
+        ${e.series ? historyTable(e) : ""}`;
+      const sw = el.querySelector(".spark-wrap");
+      if (sw) {
+        const toggle = () => {
+          const h = el.querySelector(".history");
+          h.hidden = !h.hidden;
+          sw.setAttribute("aria-expanded", String(!h.hidden));
+        };
+        sw.addEventListener("click", toggle);
+        sw.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(); }
+        });
+      }
       grid.appendChild(el);
       return { e, el, num: el.querySelector(".num"), since: el.querySelector(".since"), rate: perSecond(e.annual) };
     });
