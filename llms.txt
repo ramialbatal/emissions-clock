@@ -9,8 +9,8 @@
 - A switch between CO₂ and methane, and a plain-language explanation of how each gas causes warming.
 
 ## Data sources (fetched live from Our World in Data)
-- CO₂: Global Carbon Project, Global Carbon Budget — fossil fuels and cement, territorial, excluding land-use change. https://ourworldindata.org/co2-emissions
-- Methane: Jones et al., National contributions to climate change — all human sources, in CO₂-equivalents (100-year GWP). https://ourworldindata.org/methane-emissions
+- CO₂: Global Carbon Project, Global Carbon Budget: fossil fuels and cement, territorial, excluding land-use change. https://ourworldindata.org/co2-emissions
+- Methane: Jones et al., National contributions to climate change: all human sources, in CO₂-equivalents (100-year GWP). https://ourworldindata.org/methane-emissions
 
 ## Method
 The latest official annual value is projected to the current year using the latest year-on-year change, then spread evenly across the year: emitted so far = projected annual total × fraction of the year elapsed (UTC). The live counters are a model, not a real-time measurement.

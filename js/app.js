@@ -92,7 +92,7 @@
   const yearFraction = (now) => (now - Date.UTC(YEAR, 0, 1)) / MS_PER_YEAR(YEAR);
 
   // ---- Rendering -----------------------------------------------------------
-  // 12.42 Gt / 573 Mt / 48.2 Mt — keeps small methane figures readable
+  // 12.42 Gt / 573 Mt / 48.2 Mt: keeps small methane figures readable
   function mass(t) {
     if (Math.abs(t) >= 1e9) return fmt2.format(t / 1e9) + " Gt";
     return (Math.abs(t) >= 1e8 ? fmt0 : fmt1).format(t / 1e6) + " Mt";
@@ -133,7 +133,7 @@
       <svg class="spark" viewBox="-2 0 ${W + 4} ${H}" preserveAspectRatio="none" aria-hidden="true">
         <polyline points="${pts}"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.2"/>
       </svg>
-      <figcaption>${first}–${last} <b class="${change > 0 ? "up" : change < 0 ? "down" : ""}">${
+      <figcaption>${first}-${String(last).slice(2)} <b class="${change > 0 ? "up" : change < 0 ? "down" : ""}">${
         change > 0 ? "+" : ""}${fmt0.format(change)}%</b></figcaption>
       <span class="sr-only">Annual emissions ${first} to ${last}</span>
     </figure>`;
@@ -211,9 +211,9 @@
           <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt1 : fmt0).format(perSecond(e.annual))} t</dd></div>
           <div><dt>${e.lastYear} official</dt><dd>${mass(e.lastValue)}</dd></div>
           <div><dt>${YEAR} projected</dt><dd>${mass(e.annual)}</dd></div>
-          <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt1.format(e.perCap) + " t" : "—"}</dd></div>
+          <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt1.format(e.perCap) + " t" : "n/a"}</dd></div>
           <div><dt>Trend / yr</dt><dd class="${g > 0 ? "up" : g < 0 ? "down" : ""}">${
-            g == null ? "—" : (g > 0 ? "▲ +" : g < 0 ? "▼ " : "") + fmt1.format(g * 100) + "%"}</dd></div>
+            g == null ? "n/a" : (g > 0 ? "▲ +" : g < 0 ? "▼ " : "") + fmt1.format(g * 100) + "%"}</dd></div>
           <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
         </dl>
         ${e.series ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(e)}` : ""}`;
@@ -360,7 +360,7 @@
   function applyGasLabels(key) {
     const gas = CFG.gases[key];
     document.body.dataset.gas = key;
-    document.title = `Live ${gas.label} Emissions Clock – World and Countries in Real Time`;
+    document.title = `Live ${gas.label} Emissions Clock: World and Countries in Real Time`;
     document.querySelectorAll("[data-gas-label]").forEach((el) => (el.textContent = gas.label));
     document.querySelectorAll("[data-gas-long]").forEach((el) => (el.textContent = gas.long));
     document.querySelectorAll("[data-gas-unit]").forEach((el) => (el.textContent = gas.unitLong));
