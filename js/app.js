@@ -99,6 +99,27 @@
   }
   const digits = (s) => s.replace(/[0-9]/g, (d) => `<span class="d">${d}</span>`);
 
+  // Redraw about 10 times a second (not every frame), write only text that changed,
+  // and reload when the year rolls over so a tab left open on 31 December restarts cleanly.
+  const lastText = new WeakMap();
+  function setText(el, str, html = false) {
+    if (lastText.get(el) === str) return;
+    lastText.set(el, str);
+    if (html) el.innerHTML = str; else el.textContent = str;
+  }
+  function every(fn, alive = () => true, ms = 100) {
+    let last = 0;
+    (function loop(ts) {
+      if (!alive()) return;
+      if (!last || ts - last >= ms) {
+        last = ts || 1;
+        if (new Date().getUTCFullYear() !== YEAR) { location.reload(); return; }
+        fn(Date.now());
+      }
+      requestAnimationFrame(loop);
+    })(0);
+  }
+
   function sparkline(e) {
     const ys = e.years, vals = ys.map((y) => e.series[y]);
     const min = Math.min(...vals), max = Math.max(...vals), span = max - min || 1;
@@ -232,23 +253,18 @@
     sortCards();
 
     // Clock loop
-    let lastWorld = "";
-    (function tick() {
-      if (myLoop !== loopId) return;
-      const now = Date.now();
+    every((now) => {
       const frac = yearFraction(now);
       const elapsed = (now - T0) / 1000;
-      const ws = fmt0.format(world.annual * frac);
-      if (ws !== lastWorld) { $("world-num").innerHTML = digits(ws); lastWorld = ws; }
-      $("world-since").textContent = fmt0.format(wRate * elapsed);
-      $("world-pct").textContent = fmt2.format(frac * 100);
+      setText($("world-num"), digits(fmt0.format(world.annual * frac)), true);
+      setText($("world-since"), fmt0.format(wRate * elapsed));
+      setText($("world-pct"), fmt2.format(frac * 100));
       $("world-bar").style.width = frac * 100 + "%";
       for (const c of cards) {
-        c.num.textContent = fmt0.format(c.e.annual * frac);
-        c.since.textContent = fmt0.format(c.rate * elapsed) + " t";
+        setText(c.num, fmt0.format(c.e.annual * frac));
+        setText(c.since, fmt0.format(c.rate * elapsed) + " t");
       }
-      requestAnimationFrame(tick);
-    })();
+    }, () => myLoop === loopId);
   }
 
   // ---- Carbon budget bars ---------------------------------------------------
@@ -307,24 +323,24 @@
     $("pace-bar-actual").style.width = (rate / span) * 100 + "%";
     $("pace-bar-needed").style.left = (needed / span) * 100 + "%";
     document.querySelectorAll("[data-bud-since]").forEach((el) => (el.textContent = B.since));
+    document.querySelectorAll("[data-bud-source]").forEach((el) => (el.textContent = B.source));
 
-    (function tick() {
-      const t = tYears(Date.now());
+    every((now) => {
+      const t = tYears(now);
       const used = cum(B.since, t);
       rows.forEach((r, i) => {
         const left = Math.max(totals[i] - used, 0);
         const p = Math.min(used / totals[i], 1) * 100;
-        r.pct.textContent = fmt3.format(p) + "%";
+        setText(r.pct, fmt3.format(p) + "%");
         r.bar.style.width = p + "%";
-        r.left.textContent = fmt3.format(left / 1e9) + " Gt left";
+        setText(r.left, fmt0.format(left) + " t left");   // tonnes, so it visibly ticks down
         const years = left / rate;
         const outYear = Math.floor(t + years);
-        r.out.textContent = left <= 0 ? "Used up."
-          : `Runs out in about ${fmt1.format(years)} years (${outYear}) at today's rate.`;
+        setText(r.out, left <= 0 ? "Used up."
+          : `Runs out in about ${fmt1.format(years)} years (${outYear}) at today's rate.`);
         r.el.classList.toggle("danger", years < 10);
       });
-      requestAnimationFrame(tick);
-    })();
+    });
   }
 
   if (CFG.budget) {
