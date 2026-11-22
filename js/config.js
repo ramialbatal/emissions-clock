@@ -29,6 +29,8 @@ window.CO2_CONFIG = {
       sourceUrl: "https://ourworldindata.org/methane-emissions"
     }
   },
+  // UPDATE EVERY NOVEMBER: when the Global Carbon Project publishes its new edition, change
+  // `thresholds` (gt), `from` (start of the year after the edition) and `source` below.
   // Carbon budget bars (CO2 view). Figures from the Global Carbon Budget 2026 key messages:
   // remaining budgets (50% likelihood) of 150, 510 and 1035 GtCO2 for 1.5, 1.7 and 2 degrees,
   // counted from the start of 2027 (the convention of each yearly edition).
