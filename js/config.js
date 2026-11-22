@@ -29,6 +29,24 @@ window.CO2_CONFIG = {
       sourceUrl: "https://ourworldindata.org/methane-emissions"
     }
   },
+  // Carbon budget bars (CO2 view). Figures from the Global Carbon Budget 2026 key messages:
+  // remaining budgets (50% likelihood) of 150, 510 and 1035 GtCO2 for 1.5, 1.7 and 2 degrees,
+  // counted from the start of 2027 (the convention of each yearly edition).
+  // Used = total CO2 (fossil + land-use change) since the Paris Agreement year.
+  budget: {
+    chart: "annual-co2-including-land-use", column: "emissions_total_including_land_use_change",
+    from: 2027,
+    since: 2016,
+    thresholds: [
+      { label: "1.5°C", gt: 150 },
+      { label: "1.7°C", gt: 510 },
+      { label: "2°C", gt: 1035 }
+    ],
+    source: "Global Carbon Budget 2026",
+    sourceUrl: "https://globalcarbonbudget.org/fossil-co2-emissions-decrease-in-2026/",
+    // IPCC AR6: for 1.5°C, net CO2 must fall about 48% from 2019 to 2030.
+    paris: { base: 2019, target: 2030, cut: 0.48 }
+  },
   defaultGas: "co2",
   historyFrom: 2015,   // first year fetched
   trendYears: 1,       // growth trend = average annual change over the last N years (1 = latest year-on-year change)

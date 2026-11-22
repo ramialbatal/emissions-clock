@@ -53,7 +53,7 @@
   }
   </script>
   <meta http-equiv="Cache-Control" content="no-cache">
-  <link rel="stylesheet" href="css/style.css?v=20261121i">
+  <link rel="stylesheet" href="css/style.css?v=20261121j">
 </head>
 <body data-state="loading" data-gas="co2">
   <header class="top">
@@ -107,6 +107,32 @@
       </ul>
       <p class="basis">Based on <b id="world-official"></b> Gt officially reported for <span data-latest></span>,
         growing <b id="world-growth"></b> on <span data-trend-from></span>.</p>
+    </section>
+
+    <section class="budget co2-only" id="budget" aria-labelledby="budget-title">
+      <div class="bud-intro">
+        <h2 id="budget-title">How much CO₂ can we still emit?</h2>
+        <p>The <b>carbon budget</b> is the total CO₂ the world can still release before warming passes a given limit.
+          Each bar shows how much of the budget that was left when the <b>Paris Agreement</b> was signed
+          (<span data-bud-since></span>) has already been used, counting all CO₂ including deforestation.</p>
+      </div>
+      <div id="budget-bars"></div>
+
+      <div class="pace">
+        <div class="pace-head">
+          <h3>Paris pace check</h3>
+          <span id="pace-verdict" class="verdict">…</span>
+        </div>
+        <p>To keep 1.5°C in reach, CO₂ needs to fall <b id="pace-target"></b> between 2019 and 2030. By now it should be
+          <b id="pace-needed"></b> below 2019. It is actually <b id="pace-actual"></b> compared with 2019.</p>
+        <div class="pace-bar" aria-hidden="true">
+          <i id="pace-bar-actual"></i><span id="pace-bar-needed" title="Where emissions should be now"></span>
+        </div>
+        <div class="pace-legend"><span><i class="sw actual"></i>Emissions this year</span><span><i class="sw needed"></i>Where they should be now</span></div>
+      </div>
+      <p class="src">Budgets for a 50% chance of staying below each limit: Global Carbon Budget 2026 (counted from the
+        start of 2027, so this year's remaining emissions are added on). Pace: IPCC Sixth Assessment Report.
+        "Runs out" assumes emissions stay at today's level.</p>
     </section>
 
     <section aria-label="Countries">
@@ -257,7 +283,7 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
       <a href="https://github.com/ramialbatal/emissions-clock" rel="noopener">Source code</a></p>
   </footer>
 
-  <script src="js/config.js?v=20261121i"></script>
-  <script src="js/app.js?v=20261121i"></script>
+  <script src="js/config.js?v=20261121j"></script>
+  <script src="js/app.js?v=20261121j"></script>
 </body>
 </html>

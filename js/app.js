@@ -8,6 +8,7 @@
 
   const fmt0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
   const fmt1 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmt3 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const fmt2 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   // ---- Fetching ------------------------------------------------------------
@@ -248,6 +249,90 @@
       }
       requestAnimationFrame(tick);
     })();
+  }
+
+  // ---- Carbon budget bars ---------------------------------------------------
+  // Total CO2 (fossil + land use) per year, projected like the counters for years
+  // without data. used(t) = emissions since 1 Jan of `since`; remaining(t) =
+  // budget (counted from 1 Jan of `from`) + emissions still to come before `from`.
+  async function loadBudget() {
+    const B = CFG.budget;
+    const rows = await fetchCsv(`${CFG.apiBase}${B.chart}.csv?` + new URLSearchParams({
+      v: "1", csvType: "filtered", useColumnShortNames: "true", tab: "chart", time: `${B.since - 3}..latest`
+    }) + `&country=~${CFG.world}`);
+    const series = indexByCode(rows, B.column)[CFG.world]?.series;
+    if (!series) throw new Error("No total CO2 series");
+    return series;
+  }
+
+  function renderBudget(series) {
+    const B = CFG.budget;
+    const e = buildEntry(series, CFG.trendYears);
+    const yearly = (y) => series[y] ?? e.lastValue * Math.pow(1 + e.growth, y - e.lastYear);
+    const tYears = (ms) => YEAR + (ms - Date.UTC(YEAR, 0, 1)) / MS_PER_YEAR(YEAR);
+    // tonnes emitted between 1 Jan of year a and fractional year t (negative if t < a)
+    function cum(a, t) {
+      if (t < a) return -cum(t, a);
+      let s = 0;
+      for (let y = a; y + 1 <= t; y++) s += yearly(y);
+      const y = Math.floor(t);
+      if (t > y && y >= a) s += yearly(y) * (t - y);
+      return s;
+    }
+    const rate = yearly(YEAR);   // t per year now
+    const host = $("budget-bars");
+    host.innerHTML = B.thresholds.map((th, i) => `
+      <div class="bud" data-i="${i}">
+        <div class="bud-head"><b>${th.label}</b><span class="bud-pct">0%</span> <span class="bud-txt">used</span>
+          <span class="bud-left"></span></div>
+        <div class="bud-bar"><i></i></div>
+        <p class="bud-out"></p>
+      </div>`).join("");
+    const rows = [...host.querySelectorAll(".bud")].map((el) => ({
+      pct: el.querySelector(".bud-pct"), bar: el.querySelector("i"), left: el.querySelector(".bud-left"),
+      out: el.querySelector(".bud-out"), el
+    }));
+    const totals = B.thresholds.map((th) => th.gt * 1e9 + cum(B.since, B.from));
+
+    // Paris pace check: where emissions should be now on a straight line to the 2030 cut
+    const P = B.paris, base = yearly(P.base);
+    const needed = base * (1 - P.cut * (YEAR - P.base) / (P.target - P.base));
+    const actualCh = (rate / base - 1) * 100, neededCh = (needed / base - 1) * 100;
+    $("pace-actual").textContent = (actualCh >= 0 ? "+" : "") + fmt1.format(actualCh) + "%";
+    $("pace-needed").textContent = fmt0.format(Math.abs(neededCh)) + "%";
+    $("pace-target").textContent = fmt0.format(P.cut * 100) + "%";
+    $("pace-verdict").textContent = rate <= needed ? "On track" : actualCh < 0 ? "Off track" : "Going the wrong way";
+    $("pace-verdict").className = "verdict " + (rate <= needed ? "ok" : "bad");
+    const span = Math.max(base * 1.15, rate) ;
+    $("pace-bar-actual").style.width = (rate / span) * 100 + "%";
+    $("pace-bar-needed").style.left = (needed / span) * 100 + "%";
+    document.querySelectorAll("[data-bud-since]").forEach((el) => (el.textContent = B.since));
+
+    (function tick() {
+      const t = tYears(Date.now());
+      const used = cum(B.since, t);
+      rows.forEach((r, i) => {
+        const left = Math.max(totals[i] - used, 0);
+        const p = Math.min(used / totals[i], 1) * 100;
+        r.pct.textContent = fmt3.format(p) + "%";
+        r.bar.style.width = p + "%";
+        r.left.textContent = fmt3.format(left / 1e9) + " Gt left";
+        const years = left / rate;
+        const outYear = Math.floor(t + years);
+        r.out.textContent = left <= 0 ? "Used up."
+          : `Runs out in about ${fmt1.format(years)} years (${outYear}) at today's rate.`;
+        r.el.classList.toggle("danger", years < 10);
+      });
+      requestAnimationFrame(tick);
+    })();
+  }
+
+  if (CFG.budget) {
+    loadBudget().then(renderBudget).catch((err) => {
+      console.error(err);
+      const sec = $("budget");
+      if (sec) sec.hidden = true;
+    });
   }
 
   // ---- Boot / gas switching ---------------------------------------------
