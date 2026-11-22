@@ -36,3 +36,10 @@ this year's emissions with a straight-line path to the IPCC's 48% cut from 2019 
 
 **Yearly update:** each November the Global Carbon Project publishes a new edition. Update `budget.thresholds`,
 `budget.from` and `budget.source` in `js/config.js` with the new remaining budgets (the page names the edition it uses).
+
+## Developer notes
+
+How the clocks were built, how they work, lessons learned and the rules for adding code are in the website repository:
+[ramialbatal.github.io/docs](https://github.com/ramialbatal/ramialbatal.github.io/tree/main/docs).
+This clock keeps its own copy of the shared helpers (CSV parsing, formats, ticker) because it lives in a separate
+repository; when a fix lands in the website's `shared/` folder, check whether it applies here too.
