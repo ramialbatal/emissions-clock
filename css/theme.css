@@ -1,0 +1,35 @@
+/* Emissions Clock: colours and page-specific styles (loaded after clock-core.css) */
+:root { --accent: #ff6b3d; --accent-2: #ffb347; --tint: #2a1a12; --glow: rgba(255,107,61,.35); --on-accent: #1a0d07; }
+
+/* Methane gets its own colour so the two views are easy to tell apart */
+body[data-gas="ch4"] { --accent: #b388ff; --accent-2: #d4bcff; --tint: #1f1530; --glow: rgba(179,136,255,.35); --on-accent: #120a06; }
+body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; }
+.gas-switch button { min-width: 110px; }
+
+/* Carbon budget bars: a limit less than 10 years away turns red */
+.goal-row.danger .goal-bar > i { background: linear-gradient(90deg, #ff6b3d, #ff3b3b); box-shadow: 0 0 14px rgba(255,59,59,.45); }
+.goal-row.danger .goal-num { color: var(--bad); }
+.goal-row.danger .goal-note { color: #ffb0a0; }
+.goal-row.pace { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
+.goal-row.pace h3 { margin: 0; font-size: 1rem; }
+.pace .goal-bar > span { background: var(--good); box-shadow: 0 0 8px rgba(79,209,139,.7); }
+.pace .goal-legend .sw.mark { background: var(--good); }
+
+/* CO2 vs methane comparison bars in the help pop-up */
+.cmp-row.co2 i { background: #ff6b3d; }
+.cmp-row.ch4 i { background: #b388ff; }
+.cmp-bar i.fade { background: linear-gradient(90deg, #ff6b3d 70%, rgba(255,107,61,.15)) !important; }
+
+/* Greenhouse effect diagram in the help pop-up */
+.diagram { margin: 0; background: #0d1211; border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+.diagram svg { display: block; width: 100%; height: auto; }
+.diagram figcaption { font-size: .85rem; color: var(--muted); text-align: center; margin-top: 6px; }
+.dg-band { fill: var(--accent); opacity: .16; }
+.dg-mol circle { fill: var(--accent); opacity: .8; }
+.dg-ground { fill: #1d3a2b; }
+.dg-muted { fill: var(--muted); font-size: 9.5px; }
+.dg-band-label { fill: var(--accent-2); font-size: 9.5px; font-weight: 600; }
+.dg-sun { fill: #ffd166; font-size: 9.5px; font-weight: 600; }
+.dg-heat { fill: #ff8a8a; font-size: 9.5px; font-weight: 600; }
+.dg-pill { fill: #0d1211; stroke: var(--accent); stroke-opacity: .5; }
+.pace .goal-note { margin-bottom: 12px; }

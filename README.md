@@ -1,5 +1,7 @@
 # Emissions Clock
 
+![Preview](img/og-image.png)
+
 **Live site: https://ramialbatal.github.io/emissions-clock/**
 
 A static, real-time "debt clock" style page estimating **CO₂** and **methane** emissions for the world and major emitters.
@@ -37,9 +39,31 @@ this year's emissions with a straight-line path to the IPCC's 48% cut from 2019 
 **Yearly update:** each November the Global Carbon Project publishes a new edition. Update `budget.thresholds`,
 `budget.from` and `budget.source` in `js/config.js` with the new remaining budgets (the page names the edition it uses).
 
-## Developer notes
+## Run it and check it
 
-How the clocks were built, how they work, lessons learned and the rules for adding code are in the website repository:
-[ramialbatal.github.io/docs](https://github.com/ramialbatal/ramialbatal.github.io/tree/main/docs).
-This clock keeps its own copy of the shared helpers (CSV parsing, formats, ticker) because it lives in a separate
-repository; when a fix lands in the website's `shared/` folder, check whether it applies here too.
+```sh
+npm run serve        # then open http://localhost:8000
+npm install          # dev tools only: TypeScript checker, Playwright, clock-core (types and tests)
+npm run check        # house style + types + unit tests
+npm run smoke        # real browser, real data, desktop and phone
+```
+
+Settings live in `js/config.js`, calculations in `js/model.js` (unit tested), page code in `js/app.js`. Shared helpers
+and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to a release in `index.html`.
+How the clocks are built, lessons learned and rules for new code: [developer notes](https://github.com/ramialbatal/clock-core/tree/main/docs).
+
+## Contributing
+
+Ideas, fixes and new data sources are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Part of
+[AI for things that matter](https://ramialbatal.github.io/), alongside the
+[Emissions](https://github.com/ramialbatal/emissions-clock), [Renewables](https://github.com/ramialbatal/renewables-clock)
+and [Jobs](https://github.com/ramialbatal/jobs-clock) clocks.
+
+## Licence
+
+Code: [MIT](LICENSE). Data is fetched live from its publishers and stays under their licences:
+
+| Source | Used for | Licence |
+|---|---|---|
+| Global Carbon Project, Global Carbon Budget | national and world CO₂, carbon budgets | CC BY 4.0 |
+| Jones et al., National contributions to climate change | methane in CO₂-equivalents | CC BY 4.0 |
