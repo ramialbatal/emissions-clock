@@ -3,12 +3,15 @@
  * Emissions Clock: loads the data, renders the page and runs the live counters.
  * Calculations live in model.js (pure, tested); settings in config.js.
  *
+ * The picture behind the header is in scene.js.
+ *
  * Sections: Data · Rendering helpers · Page (render) · Carbon budget · Boot and gas switching.
  */
 import * as C from "clock-core";
 import CFG from "./config.js";
 import { budgetModel } from "./model.js";
 import { co2Headline, methaneHeadline, budgetStatus, paceStatus, trendBadge } from "./messages.js";
+import { emissionsScene } from "./scene.js";
 
 const { YEAR, fmt, setText, escapeHtml } = C;
 /** @param {string} id */
@@ -292,6 +295,7 @@ function startBudget() {
 function applyGasLabels(key) {
   const gas = CFG.gases[key];
   document.body.dataset.gas = key;
+  scene.redraw();
   document.title = `Live ${gas.label} Emissions Clock: World and Countries in Real Time`;
   C.fill("gas-label", gas.label);
   C.fill("gas-long", gas.long);
@@ -338,6 +342,8 @@ document.querySelectorAll(".gas-switch button").forEach((b) => b.addEventListene
 }));
 window.addEventListener("hashchange", () => show(fromHash()));
 
+const scene = C.startScene(document.querySelector("canvas.scene"), emissionsScene(() => document.body.dataset.gas),
+  { groundAt: document.querySelector("header.top") });
 C.wireHelp();
 C.fill("year", YEAR);
 $("retry").addEventListener("click", () => { C.setState("loading"); startBudget(); show(current ?? CFG.defaultGas); });
