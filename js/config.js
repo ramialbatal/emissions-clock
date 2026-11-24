@@ -1,5 +1,7 @@
-/*
- * Which gases and countries to show, and where the official data comes from.
+// @ts-check
+/**
+ * Emissions Clock settings: gases, data sources, countries and the carbon budget.
+ * Change things here first; the code reads everything from this object.
  *
  * Data is fetched live in the browser from Our World in Data's grapher API,
  * which sends `Access-Control-Allow-Origin: *`, so no server is needed.
@@ -10,7 +12,21 @@
  *
  * To add a country, add its ISO 3166-1 alpha-3 code (OWID uses OWID_* for aggregates).
  */
-window.CO2_CONFIG = {
+
+/**
+ * @typedef {{ chart: string, column: string }} Chart
+ * @typedef {{ label: string, long: string, unit: string, unitLong: string, note?: string,
+ *   total: Chart, perCapita: Chart, source: string, sourceUrl: string }} Gas
+ * @typedef {{ code: string, flag: string, name?: string, partOf?: string }} Country
+ * @typedef {{ label: string, gt: number }} Threshold
+ * @typedef {{ chart: string, column: string, from: number, since: number, thresholds: Threshold[],
+ *   source: string, sourceUrl: string, paris: { base: number, target: number, cut: number } }} Budget
+ * @typedef {{ apiBase: string, gases: Record<"co2" | "ch4", Gas>, budget: Budget, defaultGas: "co2" | "ch4",
+ *   historyFrom: number, trendYears: number, world: string, countries: Country[] }} Config
+ */
+
+/** @type {Config} */
+export default {
   apiBase: "https://ourworldindata.org/grapher/",
   gases: {
     co2: {

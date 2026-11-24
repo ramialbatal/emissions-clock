@@ -1,0 +1,42 @@
+{
+  "name": "emissions-clock",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Live clock of CO2 and methane emissions for the world and major emitters, with carbon budget bars and a Paris pace check.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Rami Albatal",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ramialbatal/emissions-clock.git"
+  },
+  "homepage": "https://ramialbatal.github.io/emissions-clock/",
+  "scripts": {
+    "test": "node --test 'test/**/*.test.js'",
+    "typecheck": "tsc -p jsconfig.json",
+    "style": "node scripts/check-style.js",
+    "smoke": "node scripts/smoke.js",
+    "check": "npm run style && npm run typecheck && npm test",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "clock-core": "github:ramialbatal/clock-core#7f64264169149b91d119f75504cf419cf42475c2",
+    "playwright": "1.48.2",
+    "typescript": "5.6.3"
+  },
+  "smoke": {
+    "ticking": [
+      "#world-num",
+      ".goal-side"
+    ],
+    "verdicts": [
+      "#pace-verdict"
+    ],
+    "hashes": [
+      "#methane"
+    ]
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
