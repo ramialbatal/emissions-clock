@@ -146,4 +146,12 @@ export default {
   "a.safer": "Límite más seguro: {limit} de calentamiento",
   "a.upper": "Límite superior: {limit} de calentamiento",
   "a.fastEnough": "¿Bajan las emisiones lo bastante rápido?",
+
+  // "What can I do?" (js/actions.js)
+  "act.travel.t": "Muévete de otra forma",
+  "act.travel.x": "En los trayectos cortos, camina, ve en bici o usa el autobús o el tren, y elige el tren en lugar de vuelos cortos cuando puedas. El transporte causa cerca del 15% de los gases de efecto invernadero del mundo.",
+  "act.food.t": "Desperdicia menos comida",
+  "act.food.x": "Planifica las comidas, aprovecha las sobras y haz compost. Los alimentos que se pierden o se tiran causan entre el 8 y el 10% de las emisiones del mundo, y al pudrirse en los vertederos liberan metano.",
+  "act.leaders.t": "Pide recortes más rápidos",
+  "act.leaders.x": "Pide a tus representantes una salida justa y rápida del carbón, el petróleo y el gas, empezando por las fugas de metano: cerca del 40% del metano de los combustibles fósiles podría evitarse sin coste neto.",
 };

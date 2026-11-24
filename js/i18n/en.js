@@ -67,4 +67,12 @@ export default {
   "a.safer": "Safer limit: {limit} of warming",
   "a.upper": "Upper limit: {limit} of warming",
   "a.fastEnough": "Are emissions falling fast enough?",
+
+  // "What can I do?" (js/actions.js)
+  "act.travel.t": "Travel lighter",
+  "act.travel.x": "Walk, cycle or take the bus or train for short trips, and the train instead of short flights when you can. Transport causes about 15% of the world's greenhouse gases.",
+  "act.food.t": "Waste less food",
+  "act.food.x": "Plan meals, use leftovers and compost scraps. Food that is lost or wasted causes 8 to 10% of the world's emissions, and rotting food in landfills releases methane.",
+  "act.leaders.t": "Ask leaders for faster cuts",
+  "act.leaders.x": "Ask your representatives for a fair, fast move away from coal, oil and gas, starting with methane leaks: about 40% of the methane from fossil fuels could be avoided at no net cost.",
 };
