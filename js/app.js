@@ -90,8 +90,8 @@ function sparkFor(e, name) {
   const first = e.years[0], last = e.years[e.years.length - 1];
   const change = (vals[vals.length - 1] / vals[0] - 1) * 100;
   return C.sparkline(e.years, vals, {
-    caption: `${first}-${String(last).slice(2)}`, change, changeText: C.signed(change) + "%", good: "down",
-    label: t("a.spark", { name, first, last, change: C.signed(change) + "%" })
+    caption: `${first}-${String(last).slice(2)}`, change, changeText: C.signedPct(change, 0), good: "down",
+    label: t("a.spark", { name, first, last, change: C.signedPct(change, 0) })
   });
 }
 
@@ -101,7 +101,7 @@ function historyTable(e) {
     const prev = e.series[y - 1];
     const ch = prev ? (e.series[y] / prev - 1) * 100 : null;
     return `<tr><th>${y}</th><td>${mass(e.series[y])}</td><td class="${ch == null ? "" : goodBadClass(ch, 1)}">${
-      ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
+      ch == null ? "" : C.signedPct(ch, 1)}</td></tr>`;
   }).join("");
   return `<div class="history" hidden><table><caption>${t("a.history")}</caption>${rows}</table></div>`;
 }
@@ -150,7 +150,7 @@ function render(data, gasKey) {
   $("world-rate").textContent = fmt[0].format(wRate);
   $("world-annual").textContent = fmt[2].format(world.annual / 1e9);
   $("world-official").textContent = fmt[2].format(world.lastValue / 1e9);
-  $("world-growth").textContent = C.signed(world.growth * 100, fmt[1]) + "%";
+  $("world-growth").textContent = C.signedPct(world.growth * 100, 1);
 
   const grid = $("grid");
   grid.innerHTML = "";
@@ -245,7 +245,7 @@ function renderBudget(series) {
   C.fill("paris-target", P.target);
   $("pace-target").textContent = C.pct(P.cut * 100, 0);
   $("pace-needed").textContent = C.pct(Math.abs(pace.neededCh), 0);
-  $("pace-actual").textContent = C.signed(pace.actualCh, fmt[1]) + "%";
+  $("pace-actual").textContent = C.signedPct(pace.actualCh, 1);
   C.showVerdict($("pace-verdict"), pace.verdict);
   renderStatusCards(m);
   paceKey = pace.verdict.key;
