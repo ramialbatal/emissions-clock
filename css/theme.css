@@ -35,3 +35,6 @@ body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; 
 .pace .goal-note { margin-bottom: 12px; }
 .pace .goal-note b { color: var(--text); font-family: var(--mono); }
 #budget-bars .goal-top b { min-width: 3.2em; }
+
+/* Right to left: warming limits like "1.5°C" keep their order */
+[dir="rtl"] #budget-bars .goal-top b { direction: ltr; unicode-bidi: isolate; }

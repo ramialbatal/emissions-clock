@@ -77,7 +77,7 @@ export default {
   "ch4.what.p": "El metano es el principal componente del gas natural. Las personas lo liberamos con las <b>fugas en la extracción de petróleo, gas y carbón</b>, las <b>vacas y ovejas</b> (se forma en su estómago), los <b>arrozales</b> y la <b>basura que se pudre en los vertederos</b>.",
   "ch4.why.h": "Por qué importa",
   "ch4.why.p1": "<b>Es muy potente, pero dura poco.</b> Una tonelada de metano atrapa unas <b>80 veces más calor</b> que una de CO₂ durante sus primeros 20 años, pero se descompone en unos <b>12 años</b>.",
-  "ch4.why.p2": "Por eso es el <b>freno más rápido</b> del calentamiento: si reducimos el metano hoy, el efecto se nota en menos de diez años. Hasta ahora ha calentado el planeta aproximadamente un tercio de lo que lo ha calentado el CO₂.",
+  "ch4.why.p2": "Por eso es el <b>freno más rápido</b> del calentamiento: si reducimos el metano hoy, el efecto se nota en menos de diez años. Hasta ahora es responsable de cerca de un tercio del calentamiento.",
   "ch4.analogy": "💡 Si el CO₂ es una <b>manta cada vez más gruesa</b>, el metano es un <b>calefactor potente con temporizador</b>: calienta mucho mientras está encendido, pero se apaga solo, siempre que no sigamos añadiendo más.",
   "ch4.eq.h": "Por qué esta página muestra «CO₂ equivalente»",
   "ch4.eq.p": "Para comparar los gases de forma justa, el metano se convierte en la cantidad de CO₂ que causaría el mismo calentamiento en 100 años (1 tonelada de metano ≈ 28 toneladas de CO₂ eq). A 20 años, el factor es de unos 80, así que la cifra a 100 años se queda corta para su efecto a corto plazo.",
