@@ -33,3 +33,5 @@ body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; 
 .dg-heat { fill: #ff8a8a; font-size: 9.5px; font-weight: 600; }
 .dg-pill { fill: #0d1211; stroke: var(--accent); stroke-opacity: .5; }
 .pace .goal-note { margin-bottom: 12px; }
+.pace .goal-note b { color: var(--text); font-family: var(--mono); }
+#budget-bars .goal-top b { min-width: 3.2em; }

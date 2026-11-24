@@ -1,41 +1,25 @@
 // @ts-check
 /**
- * Emissions Clock: pure data and model functions (no DOM, no network). Unit tested in test/model.test.js.
+ * Emissions Clock: pure model functions (no DOM, no network). Unit tested in test/model.test.js.
+ * Parsing uses clock-core's seriesByCode / namesByCode; this file holds only what is specific to emissions.
  */
-import { project, YEAR } from "clock-core";
+import { project, verdict, shown, YEAR } from "clock-core";
 
 /** @typedef {Record<number, number>} Series  Tonnes by year. */
 /** @typedef {import("./config.js").Budget} Budget */
 
 /**
- * Index OWID rows into { code: { name, series } } for one value column, keeping wanted codes only.
- * @param {Record<string, string>[]} rows
- * @param {string} column
- * @param {Iterable<string>} wanted
- * @returns {Record<string, { name: string, series: Series }>}
- */
-export function indexEntities(rows, column, wanted) {
-  const keep = new Set(wanted);
-  /** @type {Record<string, { name: string, series: Series }>} */
-  const out = {};
-  for (const r of rows) {
-    const v = parseFloat(r[column]);
-    if (!keep.has(r.code) || !Number.isFinite(v)) continue;
-    (out[r.code] ||= { name: r.entity, series: {} }).series[Number(r.year)] = v;
-  }
-  return out;
-}
-
-/**
  * "Rest of world": world minus the listed top-level countries (those not part of another listed entry).
+ * A country whose data ends before the world's latest year counts with its projected value for that year,
+ * so it isn't silently attributed to the rest of the world.
  * @param {{ annual: number, lastValue: number, lastYear: number }} world
- * @param {{ annual: number, series: Series, partOf?: string }[]} entries
+ * @param {{ annual: number, at: (year: number) => number, partOf?: string }[]} entries
  */
 export function restOfWorld(world, entries) {
   const top = entries.filter((e) => !e.partOf);
   return {
     annual: world.annual - top.reduce((s, e) => s + e.annual, 0),
-    lastValue: world.lastValue - top.reduce((s, e) => s + (e.series[world.lastYear] || 0), 0),
+    lastValue: world.lastValue - top.reduce((s, e) => s + e.at(world.lastYear), 0),
     lastYear: world.lastYear
   };
 }
@@ -47,13 +31,16 @@ export function restOfWorld(world, entries) {
  *  - The published remaining budget counts from 1 January of `from`, so
  *    remaining(t) = budget + emissions still to come before `from` (or minus emissions since `from`).
  *  - Bar total     = used up to `from` + budget. "Runs out" = remaining / this year's rate.
+ *  - Pace check: a straight line from the base year to a `cut` reduction in the target year; compares this
+ *    year's change since the base year (as displayed, 1 decimal) with where that line is now (as displayed, 0 decimals).
  * @param {Series} totalCo2   World total CO2 including land use, tonnes per year.
  * @param {Budget} B
  * @param {number} trendYears
+ * @param {number} [maxGrowth]
  * @param {number} [year]
  */
-export function budgetModel(totalCo2, B, trendYears, year = YEAR) {
-  const p = project(totalCo2, trendYears, Infinity, year);
+export function budgetModel(totalCo2, B, trendYears, maxGrowth = Infinity, year = YEAR) {
+  const p = project(totalCo2, trendYears, maxGrowth, year);
   /**
    * Tonnes emitted from 1 January of `origin` to fractional year x.
    * @param {number} origin @param {number} x
@@ -76,28 +63,24 @@ export function budgetModel(totalCo2, B, trendYears, year = YEAR) {
     const total = th.gt * 1e9 + cum(B.since, B.from);
     return {
       label: th.label, total,
-      /** @param {number} t */
+      /** @param {number} t fractional year */
       at(t) {
         const used = cum(B.since, t);
         const left = Math.max(total - used, 0);
         const years = left / rate;
-        return { used, left, pct: Math.min(used / total, 1) * 100, years, outYear: Math.floor(t + years) };
+        return {
+          used, left, years, pct: Math.min(used / total, 1) * 100, outYear: Math.floor(t + years),
+          danger: shown(years, 1) < 10     // compared as displayed ("about 10.0 years" is not red)
+        };
       }
     };
   });
 
-  // Paris pace check: straight line from the base year to a `cut` reduction in the target year.
   const P = B.paris, base = p.at(P.base);
-  const needed = base * (1 - P.cut * (year - P.base) / (P.target - P.base));
-  const actualCh = (rate / base - 1) * 100, neededCh = (needed / base - 1) * 100;
-  const onTrack = rate <= needed;
+  const neededCh = shown(-P.cut * 100 * (year - P.base) / (P.target - P.base), 0);
+  const actualCh = shown((rate / base - 1) * 100, 1);
   return {
     cum, rate, bars,
-    pace: {
-      base, needed, actualCh, neededCh,
-      verdict: onTrack ? { cls: /** @type {const} */ ("ok"), text: "On track" }
-        : actualCh < 0 ? { cls: /** @type {const} */ ("bad"), text: "Off track" }
-        : { cls: /** @type {const} */ ("bad"), text: "Going the wrong way" }
-    }
+    pace: { base, needed: base * (1 + neededCh / 100), actualCh, neededCh, verdict: verdict(actualCh, neededCh) }
   };
 }

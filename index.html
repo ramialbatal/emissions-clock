@@ -54,9 +54,23 @@
   </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@7f64264169149b91d119f75504cf419cf42475c2/clock-core.css">
   <link rel="stylesheet" href="css/theme.css">
-  <!-- clock-core is pinned to an exact commit (release V1.0.0); to upgrade, change the version here and in the CSS link above -->
+  <!-- clock-core is pinned to an exact commit; to upgrade, change it here, in the CSS link above and in package.json -->
   <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@7f64264169149b91d119f75504cf419cf42475c2/clock-core.js" } }</script>
-  <script type="module" src="js/app.js"></script>
+  <!-- If the page code can't load (CDN down, very old browser), show the error box instead of a spinner forever -->
+  <script>
+    function clockLoadFailed() {
+      var show = function () {
+        document.body.dataset.state = "error";
+        var m = document.getElementById("error-msg");
+        if (m) m.textContent = "The page code could not load. Please check your connection, update your browser, or try again later.";
+        var r = document.getElementById("retry");
+        if (r) r.onclick = function () { location.reload(); };
+      };
+      if (document.body) show(); else document.addEventListener("DOMContentLoaded", show);
+    }
+  </script>
+  <script nomodule>clockLoadFailed();</script>
+  <script type="module" src="js/app.js" onerror="clockLoadFailed()"></script>
 </head>
 <body data-state="loading" data-gas="co2">
   <header class="top">

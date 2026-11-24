@@ -7,7 +7,9 @@
 A static, real-time "debt clock" style page estimating **CO₂** and **methane** emissions for the world and major emitters.
 A switch at the top changes gas. `#methane` in the URL opens the methane view directly.
 
-Open `index.html` in a browser, or host the folder on any static host (it's live on GitHub Pages). There's no build step and no server.
+Serve the folder with any static server (`npm run serve`, then open http://localhost:8000) or any static host (it's
+live on GitHub Pages). There's no build step. Opening `index.html` straight from disk won't work: browsers block ES
+modules on `file://` pages.
 
 ## Data
 
@@ -20,12 +22,12 @@ Each gas is fetched the first time it's shown, with a spinner while it loads:
 | CO₂ | Global Carbon Project, *Global Carbon Budget* | fossil fuels + cement, excl. land use | t CO₂ |
 | Methane | Jones et al., *National contributions to climate change* | all human sources incl. agriculture & land use | t CO₂e (100-yr) |
 
-Gases, countries and the trend window are configured in `js/config.js`.
+Gases, countries, the trend window, the growth cap and the carbon budget are configured in `js/config.js`.
 
 ## Method
 
 The latest reported year is projected to the current year using each country's latest year-on-year change
-(`trendYears` in `js/config.js`; set it higher to average over several years). That total is spread evenly
+(`trendYears` in `js/config.js`; set it higher to average over several years), capped at 20% a year (`maxGrowth`). That total is spread evenly
 across the year, so the counters show year-to-date emissions ticking in real time. This is a model, not a live measurement.
 
 ## Carbon budget bars
@@ -49,7 +51,7 @@ npm run smoke        # real browser, real data, desktop and phone
 ```
 
 Settings live in `js/config.js`, calculations in `js/model.js` (unit tested), page code in `js/app.js`. Shared helpers
-and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to a release in `index.html`.
+and styles come from [clock-core](https://github.com/ramialbatal/clock-core), pinned to an exact commit in `index.html` and `package.json`.
 How the clocks are built, lessons learned and rules for new code: [developer notes](https://github.com/ramialbatal/clock-core/tree/main/docs).
 
 ## Contributing
