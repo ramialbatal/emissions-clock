@@ -7,6 +7,13 @@
 A static, real-time "debt clock" style page estimating **CO₂** and **methane** emissions for the world and major emitters.
 A switch at the top changes gas. `#methane` in the URL opens the methane view directly.
 
+**Languages:** English, French, Spanish and Arabic. The globe at the top switches language; `?lang=fr`, `?lang=es` or
+`?lang=ar` opens one directly. Translations live in `js/i18n/`; corrections from native speakers are very welcome.
+
+**On your own website:** the "Put this clock on your website" button at the bottom gives a one-line code for a small
+live widget (the answer and the counter), in the language and view you have open. The widget is the same page with
+`?embed=1`.
+
 Serve the folder with any static server (`npm run serve`, then open http://localhost:8000) or any static host (it's
 live on GitHub Pages). There's no build step. Opening `index.html` straight from disk won't work: browsers block ES
 modules on `file://` pages.

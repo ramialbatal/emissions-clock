@@ -13,7 +13,7 @@ import { budgetModel } from "./model.js";
 import { co2Headline, methaneHeadline, budgetStatus, paceStatus, trendBadge } from "./messages.js";
 import { emissionsScene } from "./scene.js";
 
-const { YEAR, fmt, setText, escapeHtml } = C;
+const { YEAR, fmt, setText, escapeHtml, t } = C;
 /** @param {string} id */
 const $ = (id) => /** @type {HTMLElement} */ (document.getElementById(id));
 /** @typedef {keyof typeof CFG.gases} GasKey */
@@ -91,7 +91,7 @@ function sparkFor(e, name) {
   const change = (vals[vals.length - 1] / vals[0] - 1) * 100;
   return C.sparkline(e.years, vals, {
     caption: `${first}-${String(last).slice(2)}`, change, changeText: C.signed(change) + "%", good: "down",
-    label: `${name}: annual emissions ${first} to ${last}, ${C.signed(change)}%`
+    label: t("a.spark", { name, first, last, change: C.signed(change) + "%" })
   });
 }
 
@@ -103,13 +103,14 @@ function historyTable(e) {
     return `<tr><th>${y}</th><td>${mass(e.series[y])}</td><td class="${ch == null ? "" : goodBadClass(ch, 1)}">${
       ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
   }).join("");
-  return `<div class="history" hidden><table><caption>Official annual emissions</caption>${rows}</table></div>`;
+  return `<div class="history" hidden><table><caption>${t("a.history")}</caption>${rows}</table></div>`;
 }
 
 
 // ---- The answer at the top --------------------------------------------------------------
-/** Pace verdict text from the carbon budget model, once it has loaded (the CO₂ answer depends on it). */
-let paceText = "";
+/** Pace verdict from the carbon budget model, once it has loaded (the CO₂ answer depends on it). */
+/** @type {import("clock-core").Verdict["key"]} */
+let paceKey = "";
 
 const showAnswer = C.showAnswer;
 
@@ -120,25 +121,26 @@ const showAnswer = C.showAnswer;
  */
 function answerFor(key, worldGrowth) {
   if (key === "ch4") return methaneHeadline(worldGrowth);
-  if (paceText) return co2Headline(paceText);
-  return co2Headline(C.shownSign(worldGrowth * 100, 1) > 0 ? "Going backwards" : "Off track");
+  if (paceKey) return co2Headline(paceKey);
+  return co2Headline(C.shownSign(worldGrowth * 100, 1) > 0 ? "backwards" : "offTrack");
 }
 
 // ---- Page ------------------------------------------------------------------------------
 const T0 = Date.now();   // page-open time, shared by both gases
 
-/** @param {GasData} data @param {Gas} gas */
-function render(data, gas) {
+/** @param {GasData} data @param {GasKey} gasKey */
+function render(data, gasKey) {
+  const gas = CFG.gases[gasKey];
   const world = C.project(data.total[CFG.world], CFG.trendYears, CFG.maxGrowth);
   const wRate = perSecond(world.annual);
 
   const entries = CFG.countries.filter((c) => data.total[c.code]).map((c) => {
     const e = C.project(data.total[c.code], CFG.trendYears, CFG.maxGrowth);
     const pcs = data.perCap[c.code];
-    return { ...c, ...e, name: c.name || data.names[c.code] || c.code, perCap: pcs?.[e.lastYear] ?? null, rest: false, hasSeries: true };
+    return { ...c, ...e, name: C.regionName(C.flagRegion(c.flag), c.name || data.names[c.code] || c.code), perCap: pcs?.[e.lastYear] ?? null, rest: false, hasSeries: true };
   });
   const row = C.restOfWorld(world, entries);
-  const all = [...entries, { code: "ROW", flag: "🌐", name: "Rest of world", rest: true, partOf: undefined, hasSeries: false,
+  const all = [...entries, { code: "ROW", flag: "🌐", name: t("a.rest"), rest: true, partOf: undefined, hasSeries: false,
     ...row, growth: null, perCap: null }];
 
   C.fill("latest", world.lastYear);
@@ -161,24 +163,24 @@ function render(data, gas) {
       <header>
         <span class="flag" aria-hidden="true">${e.flag}</span>
         <h3>${escapeHtml(e.name)}</h3>
-        ${e.partOf ? `<span class="tag">part of ${escapeHtml(e.partOf)}</span>` : ""}
+        ${e.partOf ? `<span class="tag">${escapeHtml(t("a.partOf", { name: C.regionName(e.partOf, e.partOf) }))}</span>` : ""}
         ${C.badge(badge.tone, badge.label)}
       </header>
-      <div class="ytd"><span class="num">0</span> <small>tonnes in ${YEAR}</small></div>
-      <div class="bar" title="${fmt[1].format(share)}% of the world total"><i style="width:${Math.min(Math.max(share, 0), 100)}%"></i></div>
-      <p class="share">${fmt[0].format(share)}% of the world's ${escapeHtml(gas.inText)}</p>
+      <div class="ytd"><span class="num">0</span> <small>${t("a.tonnesIn", { year: YEAR })}</small></div>
+      <div class="bar" title="${escapeHtml(t("a.shareTitle", { pct: C.pct(share, 1) }))}"><i style="width:${Math.min(Math.max(share, 0), 100)}%"></i></div>
+      <p class="share">${escapeHtml(t("a.share", { pct: C.pct(share, 0), gas: C.tOr(`gas.${gasKey}.inText`, gas.inText) }))}</p>
       <details class="more-info">
-        <summary>More</summary>
+        <summary>${t("a.more")}</summary>
         ${e.hasSeries ? sparkFor(/** @type {C.Projection} */ (e), e.name) : ""}
         <dl>
-          <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} t</dd></div>
-          <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt[1].format(e.perCap) + " t" : "n/a"}</dd></div>
-          <div><dt>${e.lastYear} official</dt><dd>${mass(e.lastValue)}</dd></div>
-          <div><dt>${YEAR} expected</dt><dd>${mass(e.annual)}</dd></div>
-          <div><dt>Change / yr</dt><dd class="${e.growth == null ? "" : goodBadClass(e.growth * 100, 1)}">${C.trendText(e.growth)}</dd></div>
-          <div><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
+          <div><dt>${t("a.perSecond")}</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} t</dd></div>
+          <div><dt>${t("a.perPerson")}</dt><dd>${e.perCap != null ? fmt[1].format(e.perCap) + " t" : t("a.na")}</dd></div>
+          <div><dt>${t("a.official", { year: e.lastYear })}</dt><dd>${mass(e.lastValue)}</dd></div>
+          <div><dt>${t("a.expected", { year: YEAR })}</dt><dd>${mass(e.annual)}</dd></div>
+          <div><dt>${t("a.change")}</dt><dd class="${e.growth == null ? "" : goodBadClass(e.growth * 100, 1)}">${C.trendText(e.growth)}</dd></div>
+          <div><dt>${t("a.since")}</dt><dd class="since">0 t</dd></div>
         </dl>
-        ${e.hasSeries ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(/** @type {C.Projection} */ (e))}` : ""}
+        ${e.hasSeries ? `<button type="button" class="more" aria-expanded="false">${t("core.yearly")} <span aria-hidden="true">▾</span></button>${historyTable(/** @type {C.Projection} */ (e))}` : ""}
       </details>`;
     C.wireHistory(el);
     grid.appendChild(el);
@@ -224,8 +226,8 @@ function renderBudget(series) {
   const m = budgetModel(series, B, CFG.trendYears, CFG.maxGrowth);
   $("budget-bars").innerHTML = m.bars.map((b) => `
     <div class="goal-row">
-      <div class="goal-top"><b>${escapeHtml(b.label)}</b><span class="goal-num">0</span> <span class="goal-unit">t left</span>
-        <span class="goal-side">0% used</span></div>
+      <div class="goal-top"><b>${escapeHtml(b.label)}</b><span class="goal-num">0</span> <span class="goal-unit">${t("a.tLeft")}</span>
+        <span class="goal-side"></span></div>
       <div class="goal-bar"><i></i></div>
       <p class="goal-note"></p>
     </div>`).join("");
@@ -241,25 +243,25 @@ function renderBudget(series) {
   document.querySelectorAll("[data-bud-source]").forEach((el) => { if (el instanceof HTMLAnchorElement) el.href = B.sourceUrl; });
   C.fill("paris-base", P.base);
   C.fill("paris-target", P.target);
-  $("pace-target").textContent = fmt[0].format(P.cut * 100) + "%";
-  $("pace-needed").textContent = fmt[0].format(Math.abs(pace.neededCh)) + "%";
+  $("pace-target").textContent = C.pct(P.cut * 100, 0);
+  $("pace-needed").textContent = C.pct(Math.abs(pace.neededCh), 0);
   $("pace-actual").textContent = C.signed(pace.actualCh, fmt[1]) + "%";
   C.showVerdict($("pace-verdict"), pace.verdict);
   renderStatusCards(m);
-  paceText = pace.verdict.text;
-  if (document.body.dataset.gas === "co2") showAnswer(co2Headline(paceText));
+  paceKey = pace.verdict.key;
+  if (document.body.dataset.gas === "co2") showAnswer(co2Headline(paceKey));
   const span = Math.max(pace.base * 1.15, m.rate);
   $("pace-bar-actual").style.width = (m.rate / span) * 100 + "%";
-  $("pace-bar-needed").style.left = (pace.needed / span) * 100 + "%";
+  $("pace-bar-needed").style.insetInlineStart = (pace.needed / span) * 100 + "%";   // mirrors in right-to-left pages
   $("budget").hidden = false;
 
-  /** @param {number} t */
-  return (t) => m.bars.forEach((b, i) => {
-    const s = b.at(t), r = rows[i];
+  /** @param {number} ty  time in fractional years */
+  return (ty) => m.bars.forEach((b, i) => {
+    const s = b.at(ty), r = rows[i];
     setText(r.num, fmt[0].format(s.left));                 // tonnes: the number that visibly ticks
-    setText(r.side, fmt[3].format(s.pct) + "% used");
+    setText(r.side, t("a.used", { pct: C.pct(s.pct, 3) }));
     r.bar.style.width = s.pct + "%";
-    setText(r.note, s.left <= 0 ? "Used up." : `Runs out in about ${fmt[1].format(s.years)} years (${s.outYear}) at today's rate.`);
+    setText(r.note, s.left <= 0 ? t("a.usedUp") : t("a.runsOut", { years: fmt[1].format(s.years), year: s.outYear }));
     r.el.classList.toggle("danger", s.danger);
   });
 }
@@ -270,17 +272,17 @@ function renderBudget(series) {
  * @param {ReturnType<typeof budgetModel>} m
  */
 function renderStatusCards(m) {
-  const t = C.tYears();
+  const now = C.tYears();
   const limits = [m.bars[0], m.bars[m.bars.length - 1]].filter((b, i, a) => a.indexOf(b) === i);
   /** @param {string} label @param {C.Message} msg @param {number | null} pct */
-  const card = (label, msg, pct) => C.statusCard({ label, msg, pct, barLabel: pct == null ? "" : `${fmt[0].format(pct)}% used` });
+  const card = (label, msg, pct) => C.statusCard({ label, msg, pct, barLabel: pct == null ? "" : t("a.used", { pct: C.pct(pct, 0) }) });
   const pace = m.pace;
   $("status-cards").innerHTML =
     limits.map((b, i) => {
-      const s = b.at(t);
-      return card(`${i === 0 ? "Safer limit" : "Upper limit"}: ${b.label} of warming`, budgetStatus(s.years), s.pct);
+      const s = b.at(now);
+      return card(t(i === 0 ? "a.safer" : "a.upper", { limit: b.label }), budgetStatus(s.years), s.pct);
     }).join("") +
-    card("Are emissions falling fast enough?", paceStatus(pace.verdict.text, pace.actualCh, pace.neededCh, CFG.budget.paris.base), null);
+    card(t("a.fastEnough"), paceStatus(pace.verdict.key, pace.actualCh, pace.neededCh, CFG.budget.paris.base), null);
 }
 
 /** Load the budget section (again, after a failure); does nothing once it is showing. */
@@ -296,11 +298,11 @@ function applyGasLabels(key) {
   const gas = CFG.gases[key];
   document.body.dataset.gas = key;
   scene.redraw();
-  document.title = `Live ${gas.label} Emissions Clock: World and Countries in Real Time`;
-  C.fill("gas-label", gas.label);
-  C.fill("gas-long", gas.long);
-  C.fill("gas-unit", gas.unitLong);
-  C.fill("gas-note", gas.note || "");
+  document.title = t(`meta.title.${key}`);
+  C.fill("gas-label", C.tOr(`gas.${key}.label`, gas.label));
+  C.fill("gas-text", C.tOr(`gas.${key}.inText`, gas.inText));   // the gas's name inside a sentence (lower case in French)
+  C.fill("gas-long", C.tOr(`gas.${key}.long`, gas.long));
+  C.fill("gas-note", C.tOr(`gas.${key}.note`, gas.note || ""));
   C.fill("gas-source", gas.source);
   document.querySelectorAll("[data-gas-source-url]").forEach((el) => { /** @type {HTMLAnchorElement} */ (el).href = gas.sourceUrl; });
   document.querySelectorAll(".gas-switch button").forEach((b) =>
@@ -319,8 +321,8 @@ async function show(key) {
     const data = await loadGas(k);
     loaded.add(k);
     if (current !== k) return;   // switched again while loading
-    render(data, CFG.gases[k]);
-    $("fetched-at").textContent = data.fetchedAt.toLocaleString();
+    render(data, k);
+    $("fetched-at").textContent = data.fetchedAt.toLocaleString(C.locale());
     C.setState("ready");
   } catch (err) {
     if (current !== k) return;
@@ -342,6 +344,9 @@ document.querySelectorAll(".gas-switch button").forEach((b) => b.addEventListene
 }));
 window.addEventListener("hashchange", () => show(fromHash()));
 
+// Language first (the inline script in index.html chose it), so everything below is drawn in it.
+await C.startLanguage((code) => import(`./i18n/${code}.js`), document.querySelector("header.top .wrap"));
+C.wireEmbed(document.querySelector("footer.foot"));
 const scene = C.startScene(document.querySelector("canvas.scene"), emissionsScene(() => document.body.dataset.gas),
   { groundAt: document.querySelector("header.top") });
 C.wireHelp();
