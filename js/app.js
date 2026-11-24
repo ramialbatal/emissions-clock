@@ -7,7 +7,7 @@
  */
 import * as C from "clock-core";
 import CFG from "./config.js";
-import { restOfWorld, budgetModel } from "./model.js";
+import { budgetModel } from "./model.js";
 
 const { YEAR, fmt, setText, escapeHtml } = C;
 /** @param {string} id */
@@ -78,7 +78,7 @@ function mass(t) {
 }
 
 /** For emissions, down is good. @param {number} x @param {number} d decimals shown */
-const goodBadClass = (x, d) => ["good", "", "bad"][C.shownSign(x, d) + 1];
+const goodBadClass = (x, d) => C.changeClass(x, d, "down");
 
 /** @param {C.Projection} e @param {string} name */
 function sparkFor(e, name) {
@@ -102,12 +102,6 @@ function historyTable(e) {
   return `<div class="history" hidden><table><caption>Official annual emissions</caption>${rows}</table></div>`;
 }
 
-/** "▲ +1.2%" / "▼ -0.8%" / "0.0%", from the value as displayed. @param {number | null} g growth (0.012 = 1.2%) */
-function trendText(g) {
-  if (g == null) return "n/a";
-  const s = C.shownSign(g * 100, 1);
-  return (s > 0 ? "▲ " : s < 0 ? "▼ " : "") + C.signed(g * 100, fmt[1]) + "%";
-}
 
 // ---- Page ------------------------------------------------------------------------------
 const T0 = Date.now();   // page-open time, shared by both gases
@@ -122,7 +116,7 @@ function render(data, gas) {
     const pcs = data.perCap[c.code];
     return { ...c, ...e, name: c.name || data.names[c.code] || c.code, perCap: pcs?.[e.lastYear] ?? null, rest: false, hasSeries: true };
   });
-  const row = restOfWorld(world, entries);
+  const row = C.restOfWorld(world, entries);
   const all = [...entries, { code: "ROW", flag: "🌐", name: "Rest of world", rest: true, partOf: undefined, hasSeries: false,
     ...row, growth: null, perCap: null }];
 
@@ -155,7 +149,7 @@ function render(data, gas) {
         <div><dt>${e.lastYear} official</dt><dd>${mass(e.lastValue)}</dd></div>
         <div><dt>${YEAR} projected</dt><dd>${mass(e.annual)}</dd></div>
         <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt[1].format(e.perCap) + " t" : "n/a"}</dd></div>
-        <div><dt>Trend / yr</dt><dd class="${e.growth == null ? "" : goodBadClass(e.growth * 100, 1)}">${trendText(e.growth)}</dd></div>
+        <div><dt>Trend / yr</dt><dd class="${e.growth == null ? "" : goodBadClass(e.growth * 100, 1)}">${C.trendText(e.growth)}</dd></div>
         <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
       </dl>
       ${e.hasSeries ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(/** @type {C.Projection} */ (e))}` : ""}`;
@@ -214,6 +208,7 @@ function renderBudget(series) {
   C.fill("bud-since", B.since);
   C.fill("bud-from", B.from);
   C.fill("bud-source", B.source);
+  document.querySelectorAll("[data-bud-source]").forEach((el) => { if (el instanceof HTMLAnchorElement) el.href = B.sourceUrl; });
   C.fill("paris-base", P.base);
   C.fill("paris-target", P.target);
   $("pace-target").textContent = fmt[0].format(P.cut * 100) + "%";

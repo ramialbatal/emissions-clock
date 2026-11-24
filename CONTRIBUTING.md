@@ -52,8 +52,8 @@ More detail: [developer notes](https://github.com/ramialbatal/clock-core/tree/ma
 ## Yearly update (every November)
 
 The remaining carbon budgets are the only hand-entered figures. When the Global Carbon Project publishes its new
-Global Carbon Budget (usually mid-November), update `budget.thresholds`, `budget.from` and `budget.source` in
-`js/config.js`, quoting the key messages in the pull request.
+Global Carbon Budget (usually mid-November), update `budget.thresholds`, `budget.from`, `budget.source` and `budget.sourceUrl` in
+`js/config.js` (and the edition named in this README), quoting the key messages in the pull request.
 
 ## Licence
 

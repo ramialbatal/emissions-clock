@@ -4,25 +4,10 @@
  * Parsing uses clock-core's seriesByCode / namesByCode; this file holds only what is specific to emissions.
  */
 import { project, verdict, shown, YEAR } from "clock-core";
+// "Rest of world" uses clock-core's restOfWorld.
 
 /** @typedef {Record<number, number>} Series  Tonnes by year. */
 /** @typedef {import("./config.js").Budget} Budget */
-
-/**
- * "Rest of world": world minus the listed top-level countries (those not part of another listed entry).
- * A country whose data ends before the world's latest year counts with its projected value for that year,
- * so it isn't silently attributed to the rest of the world.
- * @param {{ annual: number, lastValue: number, lastYear: number }} world
- * @param {{ annual: number, at: (year: number) => number, partOf?: string }[]} entries
- */
-export function restOfWorld(world, entries) {
-  const top = entries.filter((e) => !e.partOf);
-  return {
-    annual: world.annual - top.reduce((s, e) => s + e.annual, 0),
-    lastValue: world.lastValue - top.reduce((s, e) => s + e.at(world.lastYear), 0),
-    lastYear: world.lastYear
-  };
-}
 
 /**
  * Carbon budget model.

@@ -12,5 +12,6 @@
 - Writing style: no em dashes or en dashes anywhere (text, comments, images). Professional but approachable.
 - Before finishing: `npm run check` and `npm run smoke` (use `CLOCK_CORE_DIR=../clock-core` to test against a local
   clock-core checkout).
-- Every November, update the carbon budget in `js/config.js` (`budget.thresholds`, `budget.from`, `budget.source`)
-  from the new Global Carbon Budget edition, quoting the source sentences in the pull request.
+- Every November, update the carbon budget in `js/config.js` (`budget.thresholds`, `budget.from`, `budget.source`,
+  `budget.sourceUrl` and the comment above them) and the edition named in README.md, from the new Global Carbon Budget
+  key messages, quoting the source sentences in the pull request.

@@ -52,10 +52,10 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@a797dbe276a74ade23168464fe1fe51b6a48fba6/clock-core.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@93c45766563da0e192a80fd2067d771f4a1ee88b/clock-core.css">
   <link rel="stylesheet" href="css/theme.css">
   <!-- clock-core is pinned to an exact commit; to upgrade, change it here, in the CSS link above and in package.json -->
-  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@a797dbe276a74ade23168464fe1fe51b6a48fba6/clock-core.js" } }</script>
+  <script type="importmap">{ "imports": { "clock-core": "https://cdn.jsdelivr.net/gh/ramialbatal/clock-core@93c45766563da0e192a80fd2067d771f4a1ee88b/clock-core.js" } }</script>
   <!-- If the page code can't load (CDN down, very old browser), show the error box instead of a spinner forever -->
   <script>
     function clockLoadFailed() {
@@ -144,7 +144,7 @@
         <div class="goal-bar"><i id="pace-bar-actual"></i><span id="pace-bar-needed" title="Where emissions should be now"></span></div>
         <div class="goal-legend"><span><i class="sw"></i>Emissions this year</span><span><i class="sw mark"></i>Where they should be now</span></div>
       </div>
-      <p class="src">Budgets for a 50% chance of staying below each limit: <span data-bud-source></span> (counted from
+      <p class="src">Budgets for a 50% chance of staying below each limit: <a data-bud-source href="https://globalcarbonbudget.org/" rel="noopener"></a> (counted from
         1 January <span data-bud-from></span>, so emissions still to come before then are added on). Pace: IPCC Sixth
         Assessment Report. "Runs out" assumes emissions stay at today's level.</p>
     </section>
