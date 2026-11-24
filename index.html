@@ -76,7 +76,7 @@
   <header class="top">
     <div class="wrap">
       <h1><span data-gas-label>CO₂</span> Emissions Clock</h1>
-      <p class="sub">Emitted so far in <span data-year></span>, estimated live, second by second</p>
+      <p class="sub">How much the world is releasing, live, and whether we're on track</p>
       <div class="gas-bar">
         <div class="gas-switch" role="group" aria-label="Choose greenhouse gas">
           <button type="button" data-gas="co2" aria-pressed="true">CO₂</button>
@@ -111,72 +111,84 @@
   </div>
 
   <main class="wrap ready-only">
+    <!-- 1. The answer, in one line -->
+    <section class="answer" id="answer" data-tone="bad" aria-live="polite">
+      <p class="answer-icon" id="answer-icon" aria-hidden="true"></p>
+      <h2 class="answer-title" id="answer-title"></h2>
+      <p class="answer-text" id="answer-text"></p>
+    </section>
+
+    <!-- 2. The live counter -->
     <section class="hero" aria-label="World total">
-      <p class="label">🌍 World · <span data-gas-label></span> · year to date</p>
+      <p class="label"><span data-gas-label>CO₂</span> released by the world so far in <span data-year></span></p>
       <div class="big" id="world-num">0</div>
-      <p class="unit" data-gas-unit>tonnes of CO₂</p>
-      <p class="gas-note ch4-only" data-gas-note></p>
-      <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
-      <ul class="stats">
-        <li><b id="world-rate">0</b><span>tonnes per second</span></li>
-        <li><b id="world-since">0</b><span>tonnes since you opened this page</span></li>
-        <li><b><i id="world-pct">0</i>%</b><span>of <span data-year></span>'s projected <span id="world-annual"></span> Gt</span></li>
-      </ul>
-      <p class="basis">Based on <b id="world-official"></b> Gt officially reported for <span data-latest></span>,
-        growing <b id="world-growth"></b> on <span data-trend-from></span>.</p>
+      <p class="unit">tonnes · about <b id="world-rate">0</b> more every second</p>
+      <p class="since">+<b id="world-since">0</b> tonnes since you opened this page</p>
+      <details class="more-info">
+        <summary>More about this number</summary>
+        <p class="gas-note ch4-only" data-gas-note></p>
+        <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
+        <p><b><i id="world-pct">0</i>%</b> of the year has passed. The world is expected to release about
+          <b id="world-annual"></b> billion tonnes in <span data-year></span>, based on <b id="world-official"></b> billion
+          tonnes officially reported for <span data-latest></span> (<b id="world-growth"></b> on <span data-trend-from></span>).</p>
+      </details>
     </section>
 
-    <section class="goal budget co2-only" id="budget" hidden aria-labelledby="budget-title">
-      <h2 id="budget-title">How much CO₂ can we still emit?</h2>
-      <p>The <b>carbon budget</b> is the total CO₂ the world can still release before warming passes a given limit.
-        Each bar shows how much of the budget that was left when the <b>Paris Agreement</b> was signed
-        (<span data-bud-since></span>) has already been used, counting all CO₂ including deforestation.</p>
-      <div id="budget-bars"></div>
-
-      <div class="goal-row pace">
-        <div class="goal-head">
-          <h3>Paris pace check</h3>
-          <span id="pace-verdict" class="verdict">…</span>
+    <!-- 3. Where we stand: a few traffic lights (CO₂ only) -->
+    <section class="standing co2-only" id="budget" hidden aria-labelledby="standing-title">
+      <h2 id="standing-title">Where we stand</h2>
+      <div class="status-grid" id="status-cards"></div>
+      <details class="more-info">
+        <summary>What do these mean?</summary>
+        <p>The <b>carbon budget</b> is how much more CO₂ the world can release before warming passes a limit. Each bar
+          shows how much of the budget that was left in <span data-bud-since></span>, when the Paris Agreement was
+          signed, has already been used (counting deforestation too).</p>
+        <div id="budget-bars"></div>
+        <div class="goal-row pace">
+          <div class="goal-head"><h3>Paris pace check</h3><span id="pace-verdict" class="verdict">…</span></div>
+          <p class="goal-note">To keep 1.5°C in reach, CO₂ needs to fall <b id="pace-target"></b> between
+            <span data-paris-base></span> and <span data-paris-target></span>. By now it should be <b id="pace-needed"></b>
+            below <span data-paris-base></span>. It is actually <b id="pace-actual"></b> compared with <span data-paris-base></span>.</p>
+          <div class="goal-bar"><i id="pace-bar-actual"></i><span id="pace-bar-needed" title="Where emissions should be now"></span></div>
+          <div class="goal-legend"><span><i class="sw"></i>Emissions this year</span><span><i class="sw mark"></i>Where they should be now</span></div>
         </div>
-        <p class="goal-note">To keep 1.5°C in reach, CO₂ needs to fall <b id="pace-target"></b> between
-          <span data-paris-base></span> and <span data-paris-target></span>. By now it should be <b id="pace-needed"></b>
-          below <span data-paris-base></span>. It is actually <b id="pace-actual"></b> compared with <span data-paris-base></span>.</p>
-        <div class="goal-bar"><i id="pace-bar-actual"></i><span id="pace-bar-needed" title="Where emissions should be now"></span></div>
-        <div class="goal-legend"><span><i class="sw"></i>Emissions this year</span><span><i class="sw mark"></i>Where they should be now</span></div>
-      </div>
-      <p class="src">Budgets for a 50% chance of staying below each limit: <a data-bud-source href="https://globalcarbonbudget.org/" rel="noopener"></a> (counted from
-        1 January <span data-bud-from></span>, so emissions still to come before then are added on). Pace: IPCC Sixth
-        Assessment Report. "Runs out" assumes emissions stay at today's level.</p>
+        <p class="src">Budgets for a 50% chance of staying below each limit: <a data-bud-source href="https://globalcarbonbudget.org/" rel="noopener"></a>
+          (counted from 1 January <span data-bud-from></span>, so emissions still to come before then are added on).
+          Pace: IPCC Sixth Assessment Report. "Years left" assumes emissions stay at today's level.</p>
+      </details>
     </section>
 
-    <section aria-label="Countries">
+    <!-- 4. Countries -->
+    <section aria-labelledby="countries-title">
       <div class="bar-head">
-        <h2>Major emitters</h2>
+        <h2 id="countries-title">Who releases the most</h2>
         <label>Sort by
           <select id="sort">
-            <option value="total">Total emissions</option>
-            <option value="percap">Per person</option>
-            <option value="growth">Growth trend</option>
+            <option value="total">Most emissions</option>
+            <option value="percap">Most per person</option>
+            <option value="growth">Fastest rising</option>
             <option value="name">Name</option>
           </select>
         </label>
       </div>
-      <div class="grid" id="grid"></div>
+      <p class="legend"><span class="badge ok">▼ Falling</span> good news · <span class="badge bad">▲ Rising</span> moving the wrong way</p>
+      <div class="grid collapsed" id="grid"></div>
+      <p class="show-all-row"><button type="button" class="show-all" id="show-all" hidden>Show all countries</button></p>
     </section>
 
-    <section class="method">
-      <h2>How this is calculated</h2>
+    <!-- 5. All the detail, for those who want it -->
+    <details class="method">
+      <summary><h2>How we calculate this</h2></summary>
       <p>Official inventories report emissions <em>per year</em>, not per second. When this page opens it downloads the
         latest annual figures for <span data-gas-long></span> (currently up to <span data-latest></span>), projects them
         to <span data-year></span> using each country's latest year-on-year change
-        (<span data-trend-from></span>→<span data-latest></span>), and spreads the result evenly over the year:</p>
-      <pre>growth   = E[latest] / E[latest − 1] − 1
-annual   = E[latest] × (1 + growth)^(this year − latest)
+        (<span data-trend-from></span> to <span data-latest></span>, capped at 20% a year), and spreads the result evenly over the year:</p>
+      <pre>growth   = E[latest] / E[latest - 1] - 1
+annual   = E[latest] × (1 + growth)^(this year - latest)
 per sec  = annual ÷ seconds in this year
 so far   = annual × fraction of the year elapsed (UTC)</pre>
       <p>Real emissions vary by season, weekday and time of day, so the live counters are a model, not a measurement.
         Germany is shown separately but is also part of the EU.</p>
-
       <p><button type="button" class="link-btn" data-open-help aria-haspopup="dialog">How does each gas warm the planet? →</button></p>
       <p class="co2-only"><strong>What the CO₂ figures cover:</strong> territorial carbon dioxide from burning fossil fuels and
         making cement. Land-use change (such as deforestation) is excluded, and international aviation and shipping only
@@ -187,16 +199,12 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
         methane ≈ 27 to 30 t CO₂e). Methane only lasts about 12 years in the air but traps far more heat while it does, so cutting
         it is the fastest way to slow warming in the near term. Official methane data is published with a longer delay than CO₂,
         so its projection reaches further ahead.</p>
-
-      <p>The small line chart on each card shows that country's official annual emissions from
-        <span data-first></span> to <span data-latest></span>, with the dot marking the latest year and the
-        percentage giving the change over the whole period. Each chart is scaled to its own minimum and maximum
-        (it does not start at zero), so compare the shape of the trend rather than the heights between countries.
-        Tap <em>Yearly data</em> (or the chart) to see the values for each year.</p>
+      <p>Each country's "More" shows its official yearly figures from <span data-first></span> to <span data-latest></span>
+        as a small chart (scaled to its own range, so compare shapes rather than heights) and a table.</p>
       <p class="src">Data: <span data-gas-source></span>, fetched live from
         <a data-gas-source-url href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>
         at <span id="fetched-at"></span>.</p>
-    </section>
+    </details>
   </main>
 
 

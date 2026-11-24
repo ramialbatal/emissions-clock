@@ -8,6 +8,7 @@
 import * as C from "clock-core";
 import CFG from "./config.js";
 import { budgetModel } from "./model.js";
+import { co2Headline, methaneHeadline, budgetStatus, paceStatus, trendBadge } from "./messages.js";
 
 const { YEAR, fmt, setText, escapeHtml } = C;
 /** @param {string} id */
@@ -103,6 +104,29 @@ function historyTable(e) {
 }
 
 
+// ---- The answer at the top --------------------------------------------------------------
+/** Pace verdict text from the carbon budget model, once it has loaded (the CO₂ answer depends on it). */
+let paceText = "";
+
+/** @param {import("./messages.js").Message} m */
+function showAnswer(m) {
+  $("answer").dataset.tone = m.tone;
+  $("answer-icon").textContent = m.icon;
+  $("answer-title").textContent = m.title;
+  $("answer-text").textContent = m.text ?? "";
+}
+
+/**
+ * The answer for the current view. CO₂: from the Paris pace check (or, until the budget data arrives, from the
+ * world's yearly trend). Methane: from the world's yearly trend.
+ * @param {GasKey} key @param {number} worldGrowth
+ */
+function answerFor(key, worldGrowth) {
+  if (key === "ch4") return methaneHeadline(worldGrowth);
+  if (paceText) return co2Headline(paceText);
+  return co2Headline(C.shownSign(worldGrowth * 100, 1) > 0 ? "Going backwards" : "Off track");
+}
+
 // ---- Page ------------------------------------------------------------------------------
 const T0 = Date.now();   // page-open time, shared by both gases
 
@@ -123,6 +147,7 @@ function render(data, gas) {
   C.fill("latest", world.lastYear);
   C.fill("first", world.years[0]);
   C.fill("trend-from", world.trendFrom);
+  showAnswer(answerFor(/** @type {GasKey} */ (document.body.dataset.gas ?? CFG.defaultGas), world.growth));
   $("world-rate").textContent = fmt[0].format(wRate);
   $("world-annual").textContent = fmt[2].format(world.annual / 1e9);
   $("world-official").textContent = fmt[2].format(world.lastValue / 1e9);
@@ -134,25 +159,30 @@ function render(data, gas) {
     const share = (e.annual / world.annual) * 100;
     const el = document.createElement("article");
     el.className = "card" + (e.rest ? " rest" : "");
+    const badge = trendBadge(e.growth);
     el.innerHTML = `
       <header>
         <span class="flag" aria-hidden="true">${e.flag}</span>
         <h3>${escapeHtml(e.name)}</h3>
         ${e.partOf ? `<span class="tag">part of ${escapeHtml(e.partOf)}</span>` : ""}
-        ${e.hasSeries ? sparkFor(/** @type {C.Projection} */ (e), e.name) : ""}
+        ${badge.tone ? `<span class="badge ${badge.tone}">${badge.label}</span>` : ""}
       </header>
-      <div class="ytd"><span class="num">0</span> <small>${escapeHtml(gas.unit)} in ${YEAR}</small></div>
+      <div class="ytd"><span class="num">0</span> <small>tonnes in ${YEAR}</small></div>
       <div class="bar" title="${fmt[1].format(share)}% of the world total"><i style="width:${Math.min(Math.max(share, 0), 100)}%"></i></div>
-      <dl>
-        <div><dt>Share of world</dt><dd>${fmt[1].format(share)}%</dd></div>
-        <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} t</dd></div>
-        <div><dt>${e.lastYear} official</dt><dd>${mass(e.lastValue)}</dd></div>
-        <div><dt>${YEAR} projected</dt><dd>${mass(e.annual)}</dd></div>
-        <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt[1].format(e.perCap) + " t" : "n/a"}</dd></div>
-        <div><dt>Trend / yr</dt><dd class="${e.growth == null ? "" : goodBadClass(e.growth * 100, 1)}">${C.trendText(e.growth)}</dd></div>
-        <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
-      </dl>
-      ${e.hasSeries ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(/** @type {C.Projection} */ (e))}` : ""}`;
+      <p class="share">${fmt[0].format(share)}% of the world's ${escapeHtml(gas.inText)}</p>
+      <details class="more-info">
+        <summary>More</summary>
+        ${e.hasSeries ? sparkFor(/** @type {C.Projection} */ (e), e.name) : ""}
+        <dl>
+          <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} t</dd></div>
+          <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt[1].format(e.perCap) + " t" : "n/a"}</dd></div>
+          <div><dt>${e.lastYear} official</dt><dd>${mass(e.lastValue)}</dd></div>
+          <div><dt>${YEAR} expected</dt><dd>${mass(e.annual)}</dd></div>
+          <div><dt>Change / yr</dt><dd class="${e.growth == null ? "" : goodBadClass(e.growth * 100, 1)}">${C.trendText(e.growth)}</dd></div>
+          <div><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
+        </dl>
+        ${e.hasSeries ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(/** @type {C.Projection} */ (e))}` : ""}
+      </details>`;
     C.wireHistory(el);
     grid.appendChild(el);
     return { e, el, num: el.querySelector(".num"), since: el.querySelector(".since"), rate: perSecond(e.annual) };
@@ -169,6 +199,12 @@ function render(data, gas) {
   const sortCards = () => C.sortInto(grid, cards, keys[sortSel.value]);
   sortSel.onchange = sortCards;
   sortCards();
+
+  // Show the first few countries; the rest behind one button, so the page stays short.
+  const showAll = $("show-all");
+  showAll.textContent = `Show all ${cards.length} countries`;
+  showAll.hidden = !grid.classList.contains("collapsed");
+  showAll.onclick = () => { grid.classList.remove("collapsed"); showAll.hidden = true; };
 
   C.startTicker((now) => {
     const frac = C.yearFraction(now), elapsed = (now - T0) / 1000;
@@ -215,6 +251,9 @@ function renderBudget(series) {
   $("pace-needed").textContent = fmt[0].format(Math.abs(pace.neededCh)) + "%";
   $("pace-actual").textContent = C.signed(pace.actualCh, fmt[1]) + "%";
   C.showVerdict($("pace-verdict"), pace.verdict);
+  renderStatusCards(m);
+  paceText = pace.verdict.text;
+  if (document.body.dataset.gas === "co2") showAnswer(co2Headline(paceText));
   const span = Math.max(pace.base * 1.15, m.rate);
   $("pace-bar-actual").style.width = (m.rate / span) * 100 + "%";
   $("pace-bar-needed").style.left = (pace.needed / span) * 100 + "%";
@@ -229,6 +268,31 @@ function renderBudget(series) {
     setText(r.note, s.left <= 0 ? "Used up." : `Runs out in about ${fmt[1].format(s.years)} years (${s.outYear}) at today's rate.`);
     r.el.classList.toggle("danger", s.danger);
   });
+}
+
+/**
+ * The traffic-light cards under "Where we stand": the first and last warming limits (e.g. 1.5°C and 2°C) and
+ * "are emissions falling fast enough?". Each is one colour, one short title, one sentence; details sit below.
+ * @param {ReturnType<typeof budgetModel>} m
+ */
+function renderStatusCards(m) {
+  const t = C.tYears();
+  const limits = [m.bars[0], m.bars[m.bars.length - 1]].filter((b, i, a) => a.indexOf(b) === i);
+  /** @param {string} title @param {import("./messages.js").Message} msg @param {number | null} pctUsed */
+  const card = (title, msg, pctUsed) => `
+    <article class="status-card" data-tone="${msg.tone}">
+      <p class="sc-label">${escapeHtml(title)}</p>
+      <p class="sc-title"><span aria-hidden="true">${msg.icon}</span> ${escapeHtml(msg.title)}</p>
+      ${pctUsed == null ? "" : `<div class="sc-bar" role="img" aria-label="${fmt[0].format(pctUsed)}% used"><i style="width:${pctUsed}%"></i></div>`}
+      <p class="sc-text">${escapeHtml(msg.text ?? "")}</p>
+    </article>`;
+  const pace = m.pace;
+  $("status-cards").innerHTML =
+    limits.map((b, i) => {
+      const s = b.at(t);
+      return card(`${i === 0 ? "Safer limit" : "Upper limit"}: ${b.label} of warming`, budgetStatus(s.years), s.pct);
+    }).join("") +
+    card("Are emissions falling fast enough?", paceStatus(pace.verdict.text, pace.actualCh, pace.neededCh, CFG.budget.paris.base), null);
 }
 
 /** Load the budget section (again, after a failure); does nothing once it is showing. */
