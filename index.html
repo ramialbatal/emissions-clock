@@ -3,10 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Live CO₂ &amp; Methane Emissions Clock: World and Countries in Real Time</title>
-  <meta name="description" content="Watch global CO₂ and methane emissions rise second by second. A live emissions clock for the world, China, the US, India, the EU and other major emitters, based on official Global Carbon Budget data.">
+  <title data-i18n="meta.title">Live CO₂ &amp; Methane Emissions Clock: World and Countries in Real Time</title>
+  <meta name="description" data-i18n-attr="content:meta.description" content="Watch global CO₂ and methane emissions rise second by second. A live emissions clock for the world, China, the US, India, the EU and other major emitters, based on official Global Carbon Budget data.">
   <meta name="keywords" content="CO2 emissions, carbon emissions, methane emissions, emissions clock, live CO2 counter, greenhouse gases, climate change, carbon dioxide by country, Global Carbon Budget">
+  <!-- Languages: English at the plain address, the others with ?lang=. The script below picks the language before
+       the first paint (?lang=, then the visitor's last choice, then the browser), sets <html lang dir>, points the
+       canonical address at that language, and hides the page until the translation is in (clock-core translatePage). -->
   <link rel="canonical" href="https://ramialbatal.github.io/emissions-clock/">
+  <link rel="alternate" hreflang="en" href="https://ramialbatal.github.io/emissions-clock/">
+  <link rel="alternate" hreflang="fr" href="https://ramialbatal.github.io/emissions-clock/?lang=fr">
+  <link rel="alternate" hreflang="es" href="https://ramialbatal.github.io/emissions-clock/?lang=es">
+  <link rel="alternate" hreflang="ar" href="https://ramialbatal.github.io/emissions-clock/?lang=ar">
+  <link rel="alternate" hreflang="x-default" href="https://ramialbatal.github.io/emissions-clock/">
+  <script>
+    (function () {
+      var ok = ["en", "fr", "es", "ar"], q = new URLSearchParams(location.search), saved = null, h = document.documentElement;
+      try { saved = localStorage.getItem("clock-lang"); } catch (e) {}
+      var browser = (navigator.languages || [navigator.language || ""]).map(function (x) { return String(x).slice(0, 2).toLowerCase(); });
+      var l = [q.get("lang"), saved].concat(browser).filter(function (x) { return ok.indexOf(x) >= 0; })[0] || "en";
+      h.lang = l; h.dir = l === "ar" ? "rtl" : "ltr";
+      if (q.has("embed")) h.setAttribute("data-embed", "");
+      if (l !== "en") {
+        h.setAttribute("data-i18n", "pending");
+        setTimeout(function () { h.removeAttribute("data-i18n"); }, 4000);   // never stay hidden
+        document.querySelector('link[rel="canonical"]').href = location.origin + location.pathname + "?lang=" + l;
+      }
+    })();
+  </script>
   <meta name="robots" content="index, follow">
   <meta name="google-site-verification" content="3SuQ6XzVcD3pdgYeLcflAI5zGCyUTZUtEPxxrUPsIs4" />
   <meta name="theme-color" content="#0b0f0e">
@@ -66,6 +89,7 @@
         var r = document.getElementById("retry");
         if (r) r.onclick = function () { location.reload(); };
       };
+      document.documentElement.removeAttribute("data-i18n");
       if (document.body) show(); else document.addEventListener("DOMContentLoaded", show);
     }
   </script>
@@ -76,15 +100,15 @@
   <canvas class="scene" aria-hidden="true"></canvas>
   <header class="top">
     <div class="wrap">
-      <h1><span data-gas-label>CO₂</span> Emissions Clock</h1>
-      <p class="sub">How much the world is releasing, live, and whether we're on track</p>
+      <h1 data-i18n="h.title"><span data-gas-label>CO₂</span> Emissions Clock</h1>
+      <p class="sub" data-i18n="h.sub">How much the world is releasing, live, and whether we're on track</p>
       <div class="gas-bar">
-        <div class="gas-switch" role="group" aria-label="Choose greenhouse gas">
+        <div class="gas-switch" role="group" aria-label="Choose greenhouse gas" data-i18n-attr="aria-label:h.switch">
           <button type="button" data-gas="co2" aria-pressed="true">CO₂</button>
-          <button type="button" data-gas="ch4" aria-pressed="false">Methane</button>
+          <button type="button" data-gas="ch4" aria-pressed="false" data-i18n="gas.ch4.label">Methane</button>
         </div>
         <button type="button" class="help-btn" data-open-help aria-haspopup="dialog">
-          <span aria-hidden="true">?</span><span class="sr-only">How does <span data-gas-label>CO₂</span> warm the planet?</span>
+          <span aria-hidden="true">?</span><span class="sr-only" data-i18n="h.help">How does <span data-gas-label>CO₂</span> warm the planet?</span>
         </button>
       </div>
     </div>
@@ -101,14 +125,14 @@
 
   <div class="status loading-only" role="status">
     <div class="spinner" aria-hidden="true"></div>
-    <p>Getting the latest official data…</p>
-    <p class="hint"><span data-gas-source></span>, via Our World in Data</p>
+    <p data-i18n="st.loading">Getting the latest official data…</p>
+    <p class="hint" data-i18n="st.via"><span data-gas-source></span>, via Our World in Data</p>
   </div>
 
   <div class="status error-only" role="alert">
-    <p><strong>Couldn't load the emissions data.</strong></p>
+    <p><strong data-i18n="st.error">Couldn't load the emissions data.</strong></p>
     <p class="hint" id="error-msg"></p>
-    <button id="retry" type="button">Try again</button>
+    <button id="retry" type="button" data-i18n="st.retry">Try again</button>
   </div>
 
   <main class="wrap ready-only">
@@ -120,16 +144,16 @@
     </section>
 
     <!-- 2. The live counter -->
-    <section class="hero" aria-label="World total">
-      <p class="label"><span data-gas-label>CO₂</span> released by the world so far in <span data-year></span></p>
+    <section class="hero" aria-label="World total" data-i18n-attr="aria-label:hero.aria">
+      <p class="label" data-i18n="hero.label"><span data-gas-label>CO₂</span> released by the world so far in <span data-year></span></p>
       <div class="big" id="world-num">0</div>
-      <p class="unit">tonnes · about <b id="world-rate">0</b> more every second</p>
-      <p class="since">+<b id="world-since">0</b> tonnes since you opened this page</p>
+      <p class="unit" data-i18n="hero.unit">tonnes · about <b id="world-rate">0</b> more every second</p>
+      <p class="since" data-i18n="hero.since">+<b id="world-since">0</b> tonnes since you opened this page</p>
       <details class="more-info">
-        <summary>More about this number</summary>
+        <summary data-i18n="hero.more">More about this number</summary>
         <p class="gas-note ch4-only" data-gas-note></p>
         <div class="progress" aria-hidden="true"><i id="world-bar"></i></div>
-        <p><b><i id="world-pct">0</i>%</b> of the year has passed. The world is expected to release about
+        <p data-i18n="hero.detail"><b><i id="world-pct">0</i>%</b> of the year has passed. The world is expected to release about
           <b id="world-annual"></b> billion tonnes in <span data-year></span>, based on <b id="world-official"></b> billion
           tonnes officially reported for <span data-latest></span> (<b id="world-growth"></b> on <span data-trend-from></span>).</p>
       </details>
@@ -137,23 +161,23 @@
 
     <!-- 3. Where we stand: a few traffic lights (CO₂ only) -->
     <section class="standing co2-only" id="budget" hidden aria-labelledby="standing-title">
-      <h2 id="standing-title">Where we stand</h2>
+      <h2 id="standing-title" data-i18n="st.title">Where we stand</h2>
       <div class="status-grid" id="status-cards"></div>
       <details class="more-info">
-        <summary>What do these mean?</summary>
-        <p>The <b>carbon budget</b> is how much more CO₂ the world can release before warming passes a limit. Each bar
+        <summary data-i18n="st.more">What do these mean?</summary>
+        <p data-i18n="st.budget">The <b>carbon budget</b> is how much more CO₂ the world can release before warming passes a limit. Each bar
           shows how much of the budget that was left in <span data-bud-since></span>, when the Paris Agreement was
           signed, has already been used (counting deforestation too).</p>
         <div id="budget-bars"></div>
         <div class="goal-row pace">
-          <div class="goal-head"><h3>Paris pace check</h3><span id="pace-verdict" class="verdict">…</span></div>
-          <p class="goal-note">To keep 1.5°C in reach, CO₂ needs to fall <b id="pace-target"></b> between
+          <div class="goal-head"><h3 data-i18n="pace.title">Paris pace check</h3><span id="pace-verdict" class="verdict">…</span></div>
+          <p class="goal-note" data-i18n="pace.note">To keep 1.5°C in reach, CO₂ needs to fall <b id="pace-target"></b> between
             <span data-paris-base></span> and <span data-paris-target></span>. By now it should be <b id="pace-needed"></b>
             below <span data-paris-base></span>. It is actually <b id="pace-actual"></b> compared with <span data-paris-base></span>.</p>
-          <div class="goal-bar"><i id="pace-bar-actual"></i><span id="pace-bar-needed" title="Where emissions should be now"></span></div>
-          <div class="goal-legend"><span><i class="sw"></i>Emissions this year</span><span><i class="sw mark"></i>Where they should be now</span></div>
+          <div class="goal-bar"><i id="pace-bar-actual"></i><span id="pace-bar-needed" title="Where emissions should be now" data-i18n-attr="title:pace.should"></span></div>
+          <div class="goal-legend"><span data-i18n="pace.legend1"><i class="sw"></i>Emissions this year</span><span data-i18n="pace.legend2"><i class="sw mark"></i>Where they should be now</span></div>
         </div>
-        <p class="src">Budgets for a 50% chance of staying below each limit: <a data-bud-source href="https://globalcarbonbudget.org/" rel="noopener"></a>
+        <p class="src" data-i18n="st.src">Budgets for a 50% chance of staying below each limit: <a data-bud-source href="https://globalcarbonbudget.org/" rel="noopener"></a>
           (counted from 1 January <span data-bud-from></span>, so emissions still to come before then are added on).
           Pace: IPCC Sixth Assessment Report. "Years left" assumes emissions stay at today's level.</p>
       </details>
@@ -162,47 +186,47 @@
     <!-- 4. Countries -->
     <section aria-labelledby="countries-title">
       <div class="bar-head">
-        <h2 id="countries-title">Who releases the most</h2>
-        <label>Sort by
+        <h2 id="countries-title" data-i18n="c.title">Who releases the most</h2>
+        <label><span data-i18n="c.sort">Sort by</span>
           <select id="sort">
-            <option value="total">Most emissions</option>
-            <option value="percap">Most per person</option>
-            <option value="growth">Fastest rising</option>
-            <option value="name">Name</option>
+            <option value="total" data-i18n="c.sort.total">Most emissions</option>
+            <option value="percap" data-i18n="c.sort.percap">Most per person</option>
+            <option value="growth" data-i18n="c.sort.growth">Fastest rising</option>
+            <option value="name" data-i18n="c.sort.name">Name</option>
           </select>
         </label>
       </div>
-      <p class="legend"><span class="badge ok">▼ Falling</span> good news · <span class="badge bad">▲ Rising</span> moving the wrong way</p>
+      <p class="legend" data-i18n="c.legend"><span class="badge ok">▼ Falling</span> good news · <span class="badge bad">▲ Rising</span> moving the wrong way</p>
       <div class="grid collapsed" id="grid"></div>
       <p class="show-all-row"><button type="button" class="show-all" id="show-all" hidden>Show all countries</button></p>
     </section>
 
     <!-- 5. All the detail, for those who want it -->
     <details class="method">
-      <summary><h2>How we calculate this</h2></summary>
-      <p>Official inventories report emissions <em>per year</em>, not per second. When this page opens it downloads the
+      <summary><h2 data-i18n="m.title">How we calculate this</h2></summary>
+      <p data-i18n="m.p1">Official inventories report emissions <em>per year</em>, not per second. When this page opens it downloads the
         latest annual figures for <span data-gas-long></span> (currently up to <span data-latest></span>), projects them
         to <span data-year></span> using each country's latest year-on-year change
         (<span data-trend-from></span> to <span data-latest></span>, capped at 20% a year), and spreads the result evenly over the year:</p>
-      <pre>growth   = E[latest] / E[latest - 1] - 1
+      <pre data-i18n="m.formula">growth   = E[latest] / E[latest - 1] - 1
 annual   = E[latest] × (1 + growth)^(this year - latest)
 per sec  = annual ÷ seconds in this year
 so far   = annual × fraction of the year elapsed (UTC)</pre>
-      <p>Real emissions vary by season, weekday and time of day, so the live counters are a model, not a measurement.
+      <p data-i18n="m.p2">Real emissions vary by season, weekday and time of day, so the live counters are a model, not a measurement.
         Germany is shown separately but is also part of the EU.</p>
-      <p><button type="button" class="link-btn" data-open-help aria-haspopup="dialog">How does each gas warm the planet? →</button></p>
-      <p class="co2-only"><strong>What the CO₂ figures cover:</strong> territorial carbon dioxide from burning fossil fuels and
+      <p><button type="button" class="link-btn" data-open-help aria-haspopup="dialog" data-i18n="m.help">How does each gas warm the planet? →</button></p>
+      <p class="co2-only" data-i18n="m.co2"><strong>What the CO₂ figures cover:</strong> territorial carbon dioxide from burning fossil fuels and
         making cement. Land-use change (such as deforestation) is excluded, and international aviation and shipping only
         appear in the world total.</p>
-      <p class="ch4-only"><strong>What the methane figures cover:</strong> methane (CH₄) from all human sources: fossil fuel
+      <p class="ch4-only" data-i18n="m.ch4"><strong>What the methane figures cover:</strong> methane (CH₄) from all human sources: fossil fuel
         production and leaks, livestock, rice farming, landfills, and land use and fires. Tonnes of methane are converted to
         <em>CO₂-equivalents</em> (CO₂e): the amount of CO₂ that would cause the same warming over 100 years (one tonne of
         methane ≈ 27 to 30 t CO₂e). Methane only lasts about 12 years in the air but traps far more heat while it does, so cutting
         it is the fastest way to slow warming in the near term. Official methane data is published with a longer delay than CO₂,
         so its projection reaches further ahead.</p>
-      <p>Each country's "More" shows its official yearly figures from <span data-first></span> to <span data-latest></span>
+      <p data-i18n="m.p3">Each country's "More" shows its official yearly figures from <span data-first></span> to <span data-latest></span>
         as a small chart (scaled to its own range, so compare shapes rather than heights) and a table.</p>
-      <p class="src">Data: <span data-gas-source></span>, fetched live from
+      <p class="src" data-i18n="m.src">Data: <span data-gas-source></span>, fetched live from
         <a data-gas-source-url href="https://ourworldindata.org/co2-emissions" rel="noopener">Our World in Data</a>
         at <span id="fetched-at"></span>.</p>
     </details>
@@ -211,19 +235,19 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
 
   <dialog id="help" aria-labelledby="help-title">
     <header class="sheet-head">
-      <h2 id="help-title">How <span data-gas-label>CO₂</span> warms the planet</h2>
-      <button type="button" class="close" data-close-help aria-label="Close">×</button>
+      <h2 id="help-title" data-i18n="help.title">How <span data-gas-label>CO₂</span> warms the planet</h2>
+      <button type="button" class="close" data-close-help aria-label="Close" data-i18n-attr="aria-label:core.close.button">×</button>
     </header>
     <div class="sheet">
 
       <figure class="diagram">
         <svg viewBox="0 0 320 190" role="img" aria-labelledby="dg-t">
-          <title id="dg-t">Sunlight passes through the atmosphere and warms the Earth. The Earth gives off heat; some escapes to space, but greenhouse gases trap part of it and send it back down.</title>
+          <title id="dg-t" data-i18n="dg.alt">Sunlight passes through the atmosphere and warms the Earth. The Earth gives off heat; some escapes to space, but greenhouse gases trap part of it and send it back down.</title>
           <defs>
             <marker id="ah-sun" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffd166"/></marker>
             <marker id="ah-heat" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ff6b6b"/></marker>
           </defs>
-          <text x="312" y="14" text-anchor="end" class="dg-muted">Space</text>
+          <text x="312" y="14" text-anchor="end" class="dg-muted" data-i18n="dg.space">Space</text>
           <circle cx="28" cy="26" r="15" fill="#ffd166"/>
           <rect x="0" y="62" width="320" height="46" class="dg-band"/>
           <g class="dg-mol">
@@ -232,77 +256,77 @@ so far   = annual × fraction of the year elapsed (UTC)</pre>
           </g>
           <path d="M48 40 L104 148" stroke="#ffd166" stroke-width="2.5" marker-end="url(#ah-sun)"/>
           <path d="M58 34 L140 148" stroke="#ffd166" stroke-width="2.5" marker-end="url(#ah-sun)"/>
-          <text x="72" y="40" class="dg-sun">1. Sunlight in</text>
+          <text x="72" y="40" class="dg-sun" data-i18n="dg.sun">1. Sunlight in</text>
           <rect x="0" y="152" width="320" height="38" class="dg-ground"/>
-          <text x="8" y="182" class="dg-muted">Earth’s surface warms up</text>
+          <text x="8" y="182" class="dg-muted" data-i18n="dg.ground">Earth’s surface warms up</text>
           <path d="M178 150 q-6 -10 0 -20 q6 -10 0 -20 q-6 -10 0 -20 q6 -10 0 -20 q-6 -10 0 -20 q6 -10 0 -24" fill="none" stroke="#ff6b6b" stroke-width="2.2" stroke-dasharray="0" marker-end="url(#ah-heat)"/>
-          <text x="192" y="34" class="dg-heat">2. Some heat escapes</text>
+          <text x="192" y="34" class="dg-heat" data-i18n="dg.escape">2. Some heat escapes</text>
           <path d="M246 150 q-6 -10 0 -20 q6 -10 0 -20 q-6 -10 0 -20" fill="none" stroke="#ff6b6b" stroke-width="2.2"/>
           <path d="M246 90 Q262 66 278 90" fill="none" stroke="#ff6b6b" stroke-width="2.2"/>
           <path d="M278 90 q6 10 0 20 q-6 10 0 20 q6 10 0 16" fill="none" stroke="#ff6b6b" stroke-width="2.2" marker-end="url(#ah-heat)"/>
           <g><rect x="150" y="112" width="158" height="16" rx="8" class="dg-pill"/>
-            <text x="229" y="123.5" text-anchor="middle" class="dg-band-label">Greenhouse gases: the “blanket”</text></g>
-          <text x="226" y="56" class="dg-heat">3. Some is trapped</text>
-          <text x="226" y="66" class="dg-heat">and sent back down</text>
+            <text x="229" y="123.5" text-anchor="middle" class="dg-band-label" data-i18n="dg.blanket">Greenhouse gases: the “blanket”</text></g>
+          <text x="226" y="56" class="dg-heat" data-i18n="dg.trapped1">3. Some is trapped</text>
+          <text x="226" y="66" class="dg-heat" data-i18n="dg.trapped2">and sent back down</text>
         </svg>
-        <figcaption>More greenhouse gas = a thicker blanket = more heat kept near the ground.</figcaption>
+        <figcaption data-i18n="dg.caption">More greenhouse gas = a thicker blanket = more heat kept near the ground.</figcaption>
       </figure>
 
       <div class="co2-only">
-        <h3>What it is</h3>
-        <p>Carbon dioxide is the gas released when we burn <b>coal, oil and gas</b> (in power plants, cars, planes, factories and
+        <h3 data-i18n="co2.what.h">What it is</h3>
+        <p data-i18n="co2.what.p">Carbon dioxide is the gas released when we burn <b>coal, oil and gas</b> (in power plants, cars, planes, factories and
           heating) and when we make cement. Plants and oceans absorb some of it, but we now release far more than they can take up.</p>
-        <h3>Why it matters most</h3>
-        <p><b>It piles up.</b> Much of the CO₂ we emit today will still be in the air in hundreds of years, some of it for thousands.
+        <h3 data-i18n="co2.why.h">Why it matters most</h3>
+        <p data-i18n="co2.why.p1"><b>It piles up.</b> Much of the CO₂ we emit today will still be in the air in hundreds of years, some of it for thousands.
           So every tonne adds to the blanket, and the blanket only gets thicker while we keep emitting. Since the 1800s, CO₂ in the
           air has risen from about <b>280 to 425 parts per million</b>.</p>
-        <p>That’s why CO₂ has caused <b>the largest share of global warming</b>, and why warming only stops when CO₂ emissions
+        <p data-i18n="co2.why.p2">That’s why CO₂ has caused <b>the largest share of global warming</b>, and why warming only stops when CO₂ emissions
           reach <b>net zero</b>. Slowing them down isn’t enough on its own.</p>
-        <p class="analogy">💡 Think of a <b>bathtub with the tap running</b>: turning the tap down slows the rise, but the water keeps
+        <p class="analogy" data-i18n="co2.analogy">💡 Think of a <b>bathtub with the tap running</b>: turning the tap down slows the rise, but the water keeps
           getting higher until the tap is off.</p>
       </div>
 
       <div class="ch4-only">
-        <h3>What it is</h3>
-        <p>Methane is the main ingredient of natural gas. Humans release it from <b>leaky oil, gas and coal operations</b>,
+        <h3 data-i18n="ch4.what.h">What it is</h3>
+        <p data-i18n="ch4.what.p">Methane is the main ingredient of natural gas. Humans release it from <b>leaky oil, gas and coal operations</b>,
           <b>cows and sheep</b> (it forms in their stomachs), <b>rice paddies</b>, and <b>rotting waste in landfills</b>.</p>
-        <h3>Why it matters</h3>
-        <p><b>It’s powerful but short-lived.</b> A tonne of methane traps about <b>80 times more heat</b> than a tonne of CO₂ over its
+        <h3 data-i18n="ch4.why.h">Why it matters</h3>
+        <p data-i18n="ch4.why.p1"><b>It’s powerful but short-lived.</b> A tonne of methane traps about <b>80 times more heat</b> than a tonne of CO₂ over its
           first 20 years, but it breaks down in about <b>12 years</b>.</p>
-        <p>That makes it the <b>fastest brake</b> on warming: cut methane today and the effect shows up within a decade.
+        <p data-i18n="ch4.why.p2">That makes it the <b>fastest brake</b> on warming: cut methane today and the effect shows up within a decade.
           It has caused roughly a third as much warming as CO₂ so far.</p>
-        <p class="analogy">💡 If CO₂ is a <b>blanket that keeps getting thicker</b>, methane is a <b>powerful heater on a timer</b>:
+        <p class="analogy" data-i18n="ch4.analogy">💡 If CO₂ is a <b>blanket that keeps getting thicker</b>, methane is a <b>powerful heater on a timer</b>:
           very strong while it’s on, but it switches itself off, as long as we stop adding more.</p>
-        <h3>Why this page shows “CO₂-equivalent”</h3>
-        <p>To compare gases fairly, methane is converted into the amount of CO₂ that would cause the same warming over 100 years
+        <h3 data-i18n="ch4.eq.h">Why this page shows “CO₂-equivalent”</h3>
+        <p data-i18n="ch4.eq.p">To compare gases fairly, methane is converted into the amount of CO₂ that would cause the same warming over 100 years
           (1 tonne of methane ≈ 28 tonnes CO₂-eq). Over 20 years the factor is about 80, so the 100-year number understates its short-term punch.</p>
       </div>
 
-      <h3>CO₂ vs methane at a glance</h3>
+      <h3 data-i18n="cmp.h">CO₂ vs methane at a glance</h3>
       <div class="compare">
-        <p class="cmp-q">Heat trapped per tonne <small>(first 20 years)</small></p>
+        <p class="cmp-q" data-i18n="cmp.heat">Heat trapped per tonne <small>(first 20 years)</small></p>
         <div class="cmp-row co2"><span>CO₂</span><div class="cmp-bar"><i style="width:2%"></i></div><b>1×</b></div>
-        <div class="cmp-row ch4"><span>Methane</span><div class="cmp-bar"><i style="width:100%"></i></div><b>≈80×</b></div>
+        <div class="cmp-row ch4"><span data-i18n="gas.ch4.label">Methane</span><div class="cmp-bar"><i style="width:100%"></i></div><b>≈80×</b></div>
 
-        <p class="cmp-q">How long it stays in the air</p>
-        <div class="cmp-row co2"><span>CO₂</span><div class="cmp-bar"><i class="fade" style="width:100%"></i></div><b>centuries+</b></div>
-        <div class="cmp-row ch4"><span>Methane</span><div class="cmp-bar"><i style="width:6%"></i></div><b>≈12 yrs</b></div>
+        <p class="cmp-q" data-i18n="cmp.stay">How long it stays in the air</p>
+        <div class="cmp-row co2"><span>CO₂</span><div class="cmp-bar"><i class="fade" style="width:100%"></i></div><b data-i18n="cmp.centuries">centuries+</b></div>
+        <div class="cmp-row ch4"><span data-i18n="gas.ch4.label">Methane</span><div class="cmp-bar"><i style="width:6%"></i></div><b data-i18n="cmp.12y">≈12 yrs</b></div>
 
-        <p class="cmp-q">Warming caused so far</p>
+        <p class="cmp-q" data-i18n="cmp.warming">Warming caused so far</p>
         <div class="cmp-row co2"><span>CO₂</span><div class="cmp-bar"><i style="width:100%"></i></div><b>≈0.8 °C</b></div>
-        <div class="cmp-row ch4"><span>Methane</span><div class="cmp-bar"><i style="width:62%"></i></div><b>≈0.5 °C</b></div>
-        <p class="cmp-note">Together with other gases this adds up to more than the ~1.1 to 1.3 °C we’ve seen, because air pollution
+        <div class="cmp-row ch4"><span data-i18n="gas.ch4.label">Methane</span><div class="cmp-bar"><i style="width:62%"></i></div><b>≈0.5 °C</b></div>
+        <p class="cmp-note" data-i18n="cmp.note">Together with other gases this adds up to more than the ~1.1 to 1.3 °C we’ve seen, because air pollution
           (tiny particles) has been cooling the planet slightly and hiding some of the warming. Source: IPCC AR6.</p>
       </div>
 
-      <button type="button" class="done" data-close-help>Got it</button>
+      <button type="button" class="done" data-close-help data-i18n="help.done">Got it</button>
     </div>
   </dialog>
 
   <footer class="wrap foot">
-    <p><strong>Emissions Clock</strong> estimates how much carbon dioxide (CO₂) and methane the world and the biggest
+    <p data-i18n="f.about"><strong>Emissions Clock</strong> estimates how much carbon dioxide (CO₂) and methane the world and the biggest
       emitting countries have released so far this year, updated every second from official annual data.</p>
-    <p>Estimates only · data is pulled fresh on every visit ·
+    <p data-i18n="f.links">Estimates only · data is pulled fresh on every visit ·
       <a href="https://github.com/ramialbatal/emissions-clock" rel="noopener">Source code</a></p>
   </footer>
 

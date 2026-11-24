@@ -4,11 +4,11 @@ import assert from "node:assert/strict";
 import { co2Headline, methaneHeadline, budgetStatus, paceStatus, trendBadge } from "../js/messages.js";
 
 test("co2Headline: one clear answer per pace verdict", () => {
-  assert.equal(co2Headline("Going backwards").tone, "bad");
-  assert.equal(co2Headline("Going backwards").title, "We're heading the wrong way");
-  assert.equal(co2Headline("Off track").tone, "warn");
-  assert.equal(co2Headline("Close").title, "Almost on track");
-  assert.equal(co2Headline("On track").tone, "ok");
+  assert.equal(co2Headline("backwards").tone, "bad");
+  assert.equal(co2Headline("backwards").title, "We're heading the wrong way");
+  assert.equal(co2Headline("offTrack").tone, "warn");
+  assert.equal(co2Headline("close").title, "Almost on track");
+  assert.equal(co2Headline("onTrack").tone, "ok");
 });
 
 test("methaneHeadline follows the trend as displayed", () => {
@@ -27,12 +27,12 @@ test("budgetStatus: colour and words from the years left", () => {
 });
 
 test("paceStatus says what should have happened and what did", () => {
-  const m = paceStatus("Going backwards", 2.8, -31, 2019);
+  const m = paceStatus("backwards", 2.8, -31, 2019);
   assert.equal(m.tone, "bad");
   assert.equal(m.title, "No, still rising");
   assert.equal(m.text, "They should be 31% lower than in 2019 by now. They're 2.8% higher.");
-  assert.equal(paceStatus("Off track", -4, -31, 2019).text, "They should be 31% lower than in 2019 by now. They're 4.0% lower.");
-  assert.equal(paceStatus("On track", -35, -31, 2019).title, "Yes, fast enough");
+  assert.equal(paceStatus("offTrack", -4, -31, 2019).text, "They should be 31% lower than in 2019 by now. They're 4.0% lower.");
+  assert.equal(paceStatus("onTrack", -35, -31, 2019).title, "Yes, fast enough");
 });
 
 test("trendBadge: rising is bad, falling is good, as displayed", () => {

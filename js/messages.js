@@ -4,23 +4,24 @@
  * Every message has a tone ("ok", "warn" or "bad": green, amber or red), a short title and, where useful, one
  * sentence. Keep them short, concrete and free of jargon; numbers and method details belong behind "More".
  */
-import { shown, shownSign, fmt, message } from "clock-core";
+import { shown, shownSign, fmt, pct, message, t, addStrings } from "clock-core";
+import en from "./i18n/en.js";
+
+addStrings("en", en);   // the English words; app.js adds the visitor's language on top
 
 /** @typedef {import("clock-core").Tone} Tone */
 /** @typedef {import("clock-core").Message} Message */
+/** @typedef {import("clock-core").Verdict["key"]} PaceKey  "onTrack", "close", "offTrack" or "backwards" */
 
 /**
  * The one-line answer at the top of the CO₂ view, from the Paris pace verdict.
- * @param {string} paceText  verdict text from the model ("On track", "Close", "Off track", "Going backwards")
+ * @param {PaceKey} pace  verdict key from the model
  * @returns {Message}
  */
-export function co2Headline(paceText) {
-  switch (paceText) {
-    case "On track": return message("ok", "We're on track", "The world's CO₂ emissions are falling fast enough to keep the Paris goal in reach.");
-    case "Close": return message("warn", "Almost on track", "Emissions are falling, nearly fast enough. A little more effort keeps the Paris goal in reach.");
-    case "Off track": return message("warn", "Falling, but far too slowly", "Emissions are coming down, but not nearly fast enough to keep warming under control.");
-    default: return message("bad", "We're heading the wrong way", "The world still releases more CO₂ than a few years ago. To keep warming under control, it needs to fall fast.");
-  }
+export function co2Headline(pace) {
+  const k = pace === "onTrack" || pace === "close" || pace === "offTrack" ? pace : "backwards";
+  const tone = k === "onTrack" ? "ok" : k === "backwards" ? "bad" : "warn";
+  return message(tone, t(`msg.co2.${k}.t`), t(`msg.co2.${k}.x`));
 }
 
 /**
@@ -30,9 +31,8 @@ export function co2Headline(paceText) {
  */
 export function methaneHeadline(growth) {
   const s = shownSign(growth * 100, 1);
-  if (s < 0) return message("ok", "Methane is falling", "Good news: cutting methane is the fastest way to slow warming in the next few years.");
-  if (s === 0) return message("warn", "Methane isn't falling yet", "Methane traps a lot of heat. Cutting it is the fastest way to slow warming.");
-  return message("bad", "Methane is still rising", "Methane traps a lot of heat. Cutting it is the fastest way to slow warming, but it keeps going up.");
+  const [tone, k] = s < 0 ? ["ok", "down"] : s === 0 ? ["warn", "flat"] : ["bad", "up"];
+  return message(/** @type {Tone} */ (tone), t(`msg.ch4.${k}.t`), t(`msg.ch4.${k}.x`));
 }
 
 /**
@@ -42,32 +42,29 @@ export function methaneHeadline(growth) {
  */
 export function budgetStatus(years) {
   const y = shown(years, 1);
-  const left = y <= 0 ? "Nothing left at today's pace" : `About ${fmt[1].format(y)} years left at today's pace`;
-  if (y <= 0) return message("bad", "Used up", left);
-  if (y < 5) return message("bad", "Almost used up", left);
-  if (y < 15) return message("warn", "Running out", left);
-  return message("warn", "Some room left", left);
+  const left = y <= 0 ? t("msg.budget.none") : t("msg.budget.left", { years: fmt[1].format(y) });
+  if (y <= 0) return message("bad", t("msg.budget.usedUp"), left);
+  if (y < 5) return message("bad", t("msg.budget.almost"), left);
+  if (y < 15) return message("warn", t("msg.budget.running"), left);
+  return message("warn", t("msg.budget.room"), left);
 }
 
 /**
  * "Are emissions falling fast enough?", from the Paris pace check.
- * @param {string} paceText   verdict text from the model
+ * @param {PaceKey} pace      verdict key from the model
  * @param {number} actualCh   change since the base year, % as displayed (2.8 = 2.8% higher)
  * @param {number} neededCh   where it should be by now, % as displayed (-31 = 31% lower)
  * @param {number} baseYear
  * @returns {Message}
  */
-export function paceStatus(paceText, actualCh, neededCh, baseYear) {
-  const should = `They should be ${fmt[0].format(Math.abs(neededCh))}% lower than in ${baseYear} by now.`;
-  const actual = actualCh > 0 ? `They're ${fmt[1].format(actualCh)}% higher.`
-    : actualCh < 0 ? `They're ${fmt[1].format(-actualCh)}% lower.` : "They're about the same.";
+export function paceStatus(pace, actualCh, neededCh, baseYear) {
+  const should = t("msg.pace.should", { pct: pct(Math.abs(neededCh), 0), year: baseYear });
+  const actual = actualCh > 0 ? t("msg.pace.higher", { pct: pct(actualCh, 1) })
+    : actualCh < 0 ? t("msg.pace.lower", { pct: pct(-actualCh, 1) }) : t("msg.pace.same");
   const text = `${should} ${actual}`;
-  switch (paceText) {
-    case "On track": return message("ok", "Yes, fast enough", text);
-    case "Close": return message("warn", "Almost fast enough", text);
-    case "Off track": return message("warn", "Falling, too slowly", text);
-    default: return message("bad", "No, still rising", text);
-  }
+  const k = pace === "onTrack" || pace === "close" || pace === "offTrack" ? pace : "backwards";
+  const tone = k === "onTrack" ? "ok" : k === "backwards" ? "bad" : "warn";
+  return message(tone, t(`msg.pace.${k}`), text);
 }
 
 /**
@@ -78,5 +75,5 @@ export function paceStatus(paceText, actualCh, neededCh, baseYear) {
 export function trendBadge(growth) {
   if (growth == null) return { tone: "", label: "" };
   const s = shownSign(growth * 100, 1);
-  return s > 0 ? { tone: "bad", label: "▲ Rising" } : s < 0 ? { tone: "ok", label: "▼ Falling" } : { tone: "warn", label: "● Steady" };
+  return s > 0 ? { tone: "bad", label: t("msg.badge.up") } : s < 0 ? { tone: "ok", label: t("msg.badge.down") } : { tone: "warn", label: t("msg.badge.flat") };
 }
