@@ -9,6 +9,7 @@
  */
 import * as C from "clock-core";
 import CFG from "./config.js";
+import actions from "./actions.js";
 import { budgetModel } from "./model.js";
 import { co2Headline, methaneHeadline, budgetStatus, paceStatus, trendBadge } from "./messages.js";
 import { emissionsScene } from "./scene.js";
@@ -346,7 +347,9 @@ window.addEventListener("hashchange", () => show(fromHash()));
 
 // Language first (the inline script in index.html chose it), so everything below is drawn in it.
 await C.startLanguage((code) => import(`./i18n/${code}.js`), document.querySelector("header.top .wrap"));
+C.startStats();
 C.wireEmbed(document.querySelector("footer.foot"));
+C.wireActions(actions);
 const scene = C.startScene(document.querySelector("canvas.scene"), emissionsScene(() => document.body.dataset.gas),
   { groundAt: document.querySelector("header.top") });
 C.wireHelp();

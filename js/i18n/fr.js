@@ -146,4 +146,12 @@ export default {
   "a.safer": "Limite la plus sûre : {limit} de réchauffement",
   "a.upper": "Limite haute : {limit} de réchauffement",
   "a.fastEnough": "Les émissions baissent-elles assez vite ?",
+
+  // "What can I do?" (js/actions.js)
+  "act.travel.t": "Se déplacer autrement",
+  "act.travel.x": "Pour les petits trajets, marchez, pédalez ou prenez le bus ou le train, et le train plutôt que l’avion sur les courtes distances quand c’est possible. Les transports causent environ 15 % des gaz à effet de serre dans le monde.",
+  "act.food.t": "Moins gaspiller",
+  "act.food.x": "Prévoyez vos repas, cuisinez les restes et compostez. La nourriture perdue ou gaspillée cause 8 à 10 % des émissions mondiales, et en pourrissant dans les décharges elle rejette du méthane.",
+  "act.leaders.t": "Demander des baisses plus rapides",
+  "act.leaders.x": "Demandez à vos élus une sortie juste et rapide du charbon, du pétrole et du gaz, en commençant par les fuites de méthane : environ 40 % du méthane des énergies fossiles pourrait être évité sans coût net.",
 };
