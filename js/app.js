@@ -108,13 +108,7 @@ function historyTable(e) {
 /** Pace verdict text from the carbon budget model, once it has loaded (the CO₂ answer depends on it). */
 let paceText = "";
 
-/** @param {import("./messages.js").Message} m */
-function showAnswer(m) {
-  $("answer").dataset.tone = m.tone;
-  $("answer-icon").textContent = m.icon;
-  $("answer-title").textContent = m.title;
-  $("answer-text").textContent = m.text ?? "";
-}
+const showAnswer = C.showAnswer;
 
 /**
  * The answer for the current view. CO₂: from the Paris pace check (or, until the budget data arrives, from the
@@ -165,7 +159,7 @@ function render(data, gas) {
         <span class="flag" aria-hidden="true">${e.flag}</span>
         <h3>${escapeHtml(e.name)}</h3>
         ${e.partOf ? `<span class="tag">part of ${escapeHtml(e.partOf)}</span>` : ""}
-        ${badge.tone ? `<span class="badge ${badge.tone}">${badge.label}</span>` : ""}
+        ${C.badge(badge.tone, badge.label)}
       </header>
       <div class="ytd"><span class="num">0</span> <small>tonnes in ${YEAR}</small></div>
       <div class="bar" title="${fmt[1].format(share)}% of the world total"><i style="width:${Math.min(Math.max(share, 0), 100)}%"></i></div>
@@ -201,10 +195,7 @@ function render(data, gas) {
   sortCards();
 
   // Show the first few countries; the rest behind one button, so the page stays short.
-  const showAll = $("show-all");
-  showAll.textContent = `Show all ${cards.length} countries`;
-  showAll.hidden = !grid.classList.contains("collapsed");
-  showAll.onclick = () => { grid.classList.remove("collapsed"); showAll.hidden = true; };
+  C.wireShowAll(grid, $("show-all"), cards.length);
 
   C.startTicker((now) => {
     const frac = C.yearFraction(now), elapsed = (now - T0) / 1000;
@@ -278,14 +269,8 @@ function renderBudget(series) {
 function renderStatusCards(m) {
   const t = C.tYears();
   const limits = [m.bars[0], m.bars[m.bars.length - 1]].filter((b, i, a) => a.indexOf(b) === i);
-  /** @param {string} title @param {import("./messages.js").Message} msg @param {number | null} pctUsed */
-  const card = (title, msg, pctUsed) => `
-    <article class="status-card" data-tone="${msg.tone}">
-      <p class="sc-label">${escapeHtml(title)}</p>
-      <p class="sc-title"><span aria-hidden="true">${msg.icon}</span> ${escapeHtml(msg.title)}</p>
-      ${pctUsed == null ? "" : `<div class="sc-bar" role="img" aria-label="${fmt[0].format(pctUsed)}% used"><i style="width:${pctUsed}%"></i></div>`}
-      <p class="sc-text">${escapeHtml(msg.text ?? "")}</p>
-    </article>`;
+  /** @param {string} label @param {C.Message} msg @param {number | null} pct */
+  const card = (label, msg, pct) => C.statusCard({ label, msg, pct, barLabel: pct == null ? "" : `${fmt[0].format(pct)}% used` });
   const pace = m.pace;
   $("status-cards").innerHTML =
     limits.map((b, i) => {

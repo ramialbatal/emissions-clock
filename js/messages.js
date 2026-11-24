@@ -4,13 +4,10 @@
  * Every message has a tone ("ok", "warn" or "bad": green, amber or red), a short title and, where useful, one
  * sentence. Keep them short, concrete and free of jargon; numbers and method details belong behind "More".
  */
-import { shown, shownSign, fmt } from "clock-core";
+import { shown, shownSign, fmt, message } from "clock-core";
 
-/** @typedef {"ok" | "warn" | "bad"} Tone */
-/** @typedef {{ tone: Tone, icon: string, title: string, text?: string }} Message */
-
-/** @type {Record<Tone, string>} */
-export const ICON = { ok: "🟢", warn: "🟠", bad: "🔴" };
+/** @typedef {import("clock-core").Tone} Tone */
+/** @typedef {import("clock-core").Message} Message */
 
 /**
  * The one-line answer at the top of the CO₂ view, from the Paris pace verdict.
@@ -19,14 +16,10 @@ export const ICON = { ok: "🟢", warn: "🟠", bad: "🔴" };
  */
 export function co2Headline(paceText) {
   switch (paceText) {
-    case "On track": return { tone: "ok", icon: ICON.ok, title: "We're on track",
-      text: "The world's CO₂ emissions are falling fast enough to keep the Paris goal in reach." };
-    case "Close": return { tone: "warn", icon: ICON.warn, title: "Almost on track",
-      text: "Emissions are falling, nearly fast enough. A little more effort keeps the Paris goal in reach." };
-    case "Off track": return { tone: "warn", icon: ICON.warn, title: "Falling, but far too slowly",
-      text: "Emissions are coming down, but not nearly fast enough to keep warming under control." };
-    default: return { tone: "bad", icon: ICON.bad, title: "We're heading the wrong way",
-      text: "The world still releases more CO₂ than a few years ago. To keep warming under control, it needs to fall fast." };
+    case "On track": return message("ok", "We're on track", "The world's CO₂ emissions are falling fast enough to keep the Paris goal in reach.");
+    case "Close": return message("warn", "Almost on track", "Emissions are falling, nearly fast enough. A little more effort keeps the Paris goal in reach.");
+    case "Off track": return message("warn", "Falling, but far too slowly", "Emissions are coming down, but not nearly fast enough to keep warming under control.");
+    default: return message("bad", "We're heading the wrong way", "The world still releases more CO₂ than a few years ago. To keep warming under control, it needs to fall fast.");
   }
 }
 
@@ -37,12 +30,9 @@ export function co2Headline(paceText) {
  */
 export function methaneHeadline(growth) {
   const s = shownSign(growth * 100, 1);
-  if (s < 0) return { tone: "ok", icon: ICON.ok, title: "Methane is falling",
-    text: "Good news: cutting methane is the fastest way to slow warming in the next few years." };
-  if (s === 0) return { tone: "warn", icon: ICON.warn, title: "Methane isn't falling yet",
-    text: "Methane traps a lot of heat. Cutting it is the fastest way to slow warming." };
-  return { tone: "bad", icon: ICON.bad, title: "Methane is still rising",
-    text: "Methane traps a lot of heat. Cutting it is the fastest way to slow warming, but it keeps going up." };
+  if (s < 0) return message("ok", "Methane is falling", "Good news: cutting methane is the fastest way to slow warming in the next few years.");
+  if (s === 0) return message("warn", "Methane isn't falling yet", "Methane traps a lot of heat. Cutting it is the fastest way to slow warming.");
+  return message("bad", "Methane is still rising", "Methane traps a lot of heat. Cutting it is the fastest way to slow warming, but it keeps going up.");
 }
 
 /**
@@ -53,10 +43,10 @@ export function methaneHeadline(growth) {
 export function budgetStatus(years) {
   const y = shown(years, 1);
   const left = y <= 0 ? "Nothing left at today's pace" : `About ${fmt[1].format(y)} years left at today's pace`;
-  if (y <= 0) return { tone: "bad", icon: ICON.bad, title: "Used up", text: left };
-  if (y < 5) return { tone: "bad", icon: ICON.bad, title: "Almost used up", text: left };
-  if (y < 15) return { tone: "warn", icon: ICON.warn, title: "Running out", text: left };
-  return { tone: "warn", icon: ICON.warn, title: "Some room left", text: left };
+  if (y <= 0) return message("bad", "Used up", left);
+  if (y < 5) return message("bad", "Almost used up", left);
+  if (y < 15) return message("warn", "Running out", left);
+  return message("warn", "Some room left", left);
 }
 
 /**
@@ -73,10 +63,10 @@ export function paceStatus(paceText, actualCh, neededCh, baseYear) {
     : actualCh < 0 ? `They're ${fmt[1].format(-actualCh)}% lower.` : "They're about the same.";
   const text = `${should} ${actual}`;
   switch (paceText) {
-    case "On track": return { tone: "ok", icon: ICON.ok, title: "Yes, fast enough", text };
-    case "Close": return { tone: "warn", icon: ICON.warn, title: "Almost fast enough", text };
-    case "Off track": return { tone: "warn", icon: ICON.warn, title: "Falling, too slowly", text };
-    default: return { tone: "bad", icon: ICON.bad, title: "No, still rising", text };
+    case "On track": return message("ok", "Yes, fast enough", text);
+    case "Close": return message("warn", "Almost fast enough", text);
+    case "Off track": return message("warn", "Falling, too slowly", text);
+    default: return message("bad", "No, still rising", text);
   }
 }
 
