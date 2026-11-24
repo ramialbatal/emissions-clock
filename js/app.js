@@ -2,10 +2,12 @@
 /**
  * Emissions Clock: loads the data, renders the page and runs the live counters.
  * Calculations live in model.js (pure, tested); settings in config.js.
+ *
+ * Sections: Data · Rendering helpers · Page (render) · Carbon budget · Boot and gas switching.
  */
 import * as C from "clock-core";
 import CFG from "./config.js";
-import { indexEntities, restOfWorld, budgetModel } from "./model.js";
+import { restOfWorld, budgetModel } from "./model.js";
 
 const { YEAR, fmt, setText, escapeHtml } = C;
 /** @param {string} id */
@@ -17,8 +19,8 @@ const codes = [CFG.world, ...CFG.countries.map((c) => c.code)];
 
 // ---- Data ------------------------------------------------------------------------
 /**
- * OWID chart URL for the configured countries. These single-column charts are safe to filter in the URL
- * (see lessons learned in clock-core about multi-column charts); rows are still filtered by code.
+ * OWID chart URL for some countries. These single-column charts are safe to filter in the URL
+ * (see clock-core's lessons learned about multi-column charts); rows are still filtered by code.
  * @param {string} slug @param {string[]} codeList @param {number} from
  */
 function chartUrl(slug, codeList, from) {
@@ -26,8 +28,14 @@ function chartUrl(slug, codeList, from) {
   return `${CFG.apiBase}${slug}.csv?${q}&country=~${codeList.join("~")}`;   // "~" must not be percent-encoded
 }
 
-/** @type {Partial<Record<GasKey, () => Promise<{ total: ReturnType<typeof indexEntities>, perCap: ReturnType<typeof indexEntities>, fetchedAt: Date }>>>} */
+/**
+ * @typedef {{ total: Record<string, C.Series>, perCap: Record<string, C.Series>, names: Record<string, string>, fetchedAt: Date }} GasData
+ */
+/** @type {Partial<Record<GasKey, () => Promise<GasData>>>} */
 const loaders = {};
+/** Gases whose data has loaded successfully (their views can switch without a spinner). */
+const loaded = new Set();
+
 /** @param {GasKey} key */
 function loadGas(key) {
   return (loaders[key] ||= C.once(async () => {
@@ -36,11 +44,17 @@ function loadGas(key) {
       C.fetchCsv(chartUrl(gas.total.chart, codes, CFG.historyFrom)),
       C.fetchCsv(chartUrl(gas.perCapita.chart, codes, CFG.historyFrom))
     ]);
-    const total = indexEntities(totalRows, gas.total.column, codes);
+    const cols = { code: "code", year: "year", wanted: codes };
+    const total = C.seriesByCode(totalRows, { ...cols, value: gas.total.column });
     if (!total[CFG.world]) throw new Error("World total missing from response");
     const missing = CFG.countries.filter((c) => !total[c.code]).map((c) => c.code);
-    if (missing.length) console.warn("No data returned for:", missing.join(", "));
-    return { total, perCap: indexEntities(pcRows, gas.perCapita.column, codes), fetchedAt: new Date() };
+    if (missing.length) console.warn("No emissions data for:", missing.join(", "));
+    return {
+      total,
+      perCap: C.seriesByCode(pcRows, { ...cols, value: gas.perCapita.column }),
+      names: C.namesByCode(totalRows, { code: "code", name: "entity", wanted: codes }),
+      fetchedAt: new Date()
+    };
   }))();
 }
 
@@ -48,7 +62,7 @@ function loadGas(key) {
 const loadBudget = C.once(async () => {
   const B = CFG.budget;
   const rows = await C.fetchCsv(chartUrl(B.chart, [CFG.world], B.since - 3));
-  const series = indexEntities(rows, B.column, [CFG.world])[CFG.world]?.series;
+  const series = C.seriesByCode(rows, { code: "code", year: "year", value: B.column, wanted: [CFG.world] })[CFG.world];
   if (!series) throw new Error("No total CO2 series");
   return series;
 });
@@ -63,13 +77,17 @@ function mass(t) {
   return (Math.abs(t) >= 1e8 ? fmt[0] : fmt[1]).format(t / 1e6) + " Mt";
 }
 
-/** @param {C.Projection} e */
-function sparkFor(e) {
+/** For emissions, down is good. @param {number} x @param {number} d decimals shown */
+const goodBadClass = (x, d) => ["good", "", "bad"][C.shownSign(x, d) + 1];
+
+/** @param {C.Projection} e @param {string} name */
+function sparkFor(e, name) {
   const vals = e.years.map((y) => e.series[y]);
   const first = e.years[0], last = e.years[e.years.length - 1];
   const change = (vals[vals.length - 1] / vals[0] - 1) * 100;
   return C.sparkline(e.years, vals, {
-    caption: `${first}-${String(last).slice(2)}`, change, changeText: C.signed(change) + "%", good: "down"
+    caption: `${first}-${String(last).slice(2)}`, change, changeText: C.signed(change) + "%", good: "down",
+    label: `${name}: annual emissions ${first} to ${last}, ${C.signed(change)}%`
   });
 }
 
@@ -78,27 +96,31 @@ function historyTable(e) {
   const rows = e.years.slice().reverse().map((y) => {
     const prev = e.series[y - 1];
     const ch = prev ? (e.series[y] / prev - 1) * 100 : null;
-    return `<tr><th>${y}</th><td>${mass(e.series[y])}</td><td class="${
-      ch == null ? "" : ch > 0 ? "bad" : ch < 0 ? "good" : ""}">${ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
+    return `<tr><th>${y}</th><td>${mass(e.series[y])}</td><td class="${ch == null ? "" : goodBadClass(ch, 1)}">${
+      ch == null ? "" : C.signed(ch, fmt[1]) + "%"}</td></tr>`;
   }).join("");
   return `<div class="history" hidden><table><caption>Official annual emissions</caption>${rows}</table></div>`;
+}
+
+/** "▲ +1.2%" / "▼ -0.8%" / "0.0%", from the value as displayed. @param {number | null} g growth (0.012 = 1.2%) */
+function trendText(g) {
+  if (g == null) return "n/a";
+  const s = C.shownSign(g * 100, 1);
+  return (s > 0 ? "▲ " : s < 0 ? "▼ " : "") + C.signed(g * 100, fmt[1]) + "%";
 }
 
 // ---- Page ------------------------------------------------------------------------------
 const T0 = Date.now();   // page-open time, shared by both gases
 
-/**
- * @param {Awaited<ReturnType<typeof loadGas>>} data
- * @param {Gas} gas
- */
+/** @param {GasData} data @param {Gas} gas */
 function render(data, gas) {
-  const world = C.project(data.total[CFG.world].series, CFG.trendYears);
+  const world = C.project(data.total[CFG.world], CFG.trendYears, CFG.maxGrowth);
   const wRate = perSecond(world.annual);
 
   const entries = CFG.countries.filter((c) => data.total[c.code]).map((c) => {
-    const e = C.project(data.total[c.code].series, CFG.trendYears);
-    const pcs = data.perCap[c.code]?.series;
-    return { ...c, ...e, name: c.name || data.total[c.code].name, perCap: pcs ? pcs[e.lastYear] ?? null : null, rest: false, hasSeries: true };
+    const e = C.project(data.total[c.code], CFG.trendYears, CFG.maxGrowth);
+    const pcs = data.perCap[c.code];
+    return { ...c, ...e, name: c.name || data.names[c.code] || c.code, perCap: pcs?.[e.lastYear] ?? null, rest: false, hasSeries: true };
   });
   const row = restOfWorld(world, entries);
   const all = [...entries, { code: "ROW", flag: "🌐", name: "Rest of world", rest: true, partOf: undefined, hasSeries: false,
@@ -116,7 +138,6 @@ function render(data, gas) {
   grid.innerHTML = "";
   const cards = all.map((e) => {
     const share = (e.annual / world.annual) * 100;
-    const g = e.growth;
     const el = document.createElement("article");
     el.className = "card" + (e.rest ? " rest" : "");
     el.innerHTML = `
@@ -124,18 +145,17 @@ function render(data, gas) {
         <span class="flag" aria-hidden="true">${e.flag}</span>
         <h3>${escapeHtml(e.name)}</h3>
         ${e.partOf ? `<span class="tag">part of ${escapeHtml(e.partOf)}</span>` : ""}
-        ${e.hasSeries ? sparkFor(/** @type {C.Projection} */ (e)) : ""}
+        ${e.hasSeries ? sparkFor(/** @type {C.Projection} */ (e), e.name) : ""}
       </header>
       <div class="ytd"><span class="num">0</span> <small>${escapeHtml(gas.unit)} in ${YEAR}</small></div>
-      <div class="bar" title="${fmt[1].format(share)}% of world"><i style="width:${Math.min(share * 2.5, 100)}%"></i></div>
+      <div class="bar" title="${fmt[1].format(share)}% of the world total"><i style="width:${Math.min(Math.max(share, 0), 100)}%"></i></div>
       <dl>
         <div><dt>Share of world</dt><dd>${fmt[1].format(share)}%</dd></div>
         <div><dt>Per second</dt><dd>${(perSecond(e.annual) < 10 ? fmt[1] : fmt[0]).format(perSecond(e.annual))} t</dd></div>
         <div><dt>${e.lastYear} official</dt><dd>${mass(e.lastValue)}</dd></div>
         <div><dt>${YEAR} projected</dt><dd>${mass(e.annual)}</dd></div>
         <div><dt>Per person / yr</dt><dd>${e.perCap != null ? fmt[1].format(e.perCap) + " t" : "n/a"}</dd></div>
-        <div><dt>Trend / yr</dt><dd class="${g == null ? "" : g > 0 ? "bad" : g < 0 ? "good" : ""}">${
-          g == null ? "n/a" : (g > 0 ? "▲ +" : g < 0 ? "▼ " : "") + fmt[1].format(g * 100) + "%"}</dd></div>
+        <div><dt>Trend / yr</dt><dd class="${e.growth == null ? "" : goodBadClass(e.growth * 100, 1)}">${trendText(e.growth)}</dd></div>
         <div class="wide"><dt>Since you opened this page</dt><dd class="since">0 t</dd></div>
       </dl>
       ${e.hasSeries ? `<button type="button" class="more" aria-expanded="false">Yearly data <span aria-hidden="true">▾</span></button>${historyTable(/** @type {C.Projection} */ (e))}` : ""}`;
@@ -148,8 +168,8 @@ function render(data, gas) {
   /** @type {Record<string, (c: typeof cards[number]) => number | string>} */
   const keys = {
     total: (c) => c.e.annual,
-    percap: (c) => c.e.perCap ?? -1,
-    growth: (c) => c.e.growth ?? -99,
+    percap: (c) => c.e.perCap ?? NaN,
+    growth: (c) => c.e.growth ?? NaN,
     name: (c) => c.e.name
   };
   const sortCards = () => C.sortInto(grid, cards, keys[sortSel.value]);
@@ -174,14 +194,14 @@ function render(data, gas) {
 /** @type {((t: number) => void) | null} */
 let budgetTick = null;
 
-/** @param {Record<number, number>} series */
+/** @param {C.Series} series */
 function renderBudget(series) {
   const B = CFG.budget;
-  const m = budgetModel(series, B, CFG.trendYears);
+  const m = budgetModel(series, B, CFG.trendYears, CFG.maxGrowth);
   $("budget-bars").innerHTML = m.bars.map((b) => `
     <div class="goal-row">
-      <div class="goal-top"><b>${escapeHtml(b.label)}</b><span class="goal-num">0%</span> <span class="goal-unit">used</span>
-        <span class="goal-side"></span></div>
+      <div class="goal-top"><b>${escapeHtml(b.label)}</b><span class="goal-num">0</span> <span class="goal-unit">t left</span>
+        <span class="goal-side">0% used</span></div>
       <div class="goal-bar"><i></i></div>
       <p class="goal-note"></p>
     </div>`).join("");
@@ -208,16 +228,20 @@ function renderBudget(series) {
   /** @param {number} t */
   return (t) => m.bars.forEach((b, i) => {
     const s = b.at(t), r = rows[i];
-    setText(r.num, fmt[3].format(s.pct) + "%");
+    setText(r.num, fmt[0].format(s.left));                 // tonnes: the number that visibly ticks
+    setText(r.side, fmt[3].format(s.pct) + "% used");
     r.bar.style.width = s.pct + "%";
-    setText(r.side, fmt[0].format(s.left) + " t left");   // tonnes, so it visibly ticks down
     setText(r.note, s.left <= 0 ? "Used up." : `Runs out in about ${fmt[1].format(s.years)} years (${s.outYear}) at today's rate.`);
-    r.el.classList.toggle("danger", s.years < 10);
+    r.el.classList.toggle("danger", s.danger);
   });
 }
 
-loadBudget().then((series) => { budgetTick = renderBudget(series); })
-  .catch((err) => console.error("Carbon budget data unavailable:", err));
+/** Load the budget section (again, after a failure); does nothing once it is showing. */
+function startBudget() {
+  if (budgetTick) return;
+  loadBudget().then((series) => { budgetTick = renderBudget(series); })
+    .catch((err) => console.error("Carbon budget data unavailable:", err));
+}
 
 // ---- Boot and gas switching ---------------------------------------------------------------
 /** @param {GasKey} key */
@@ -239,12 +263,13 @@ function applyGasLabels(key) {
 let current = null;
 /** @param {string} key */
 async function show(key) {
-  const k = /** @type {GasKey} */ (key in CFG.gases ? key : CFG.defaultGas);
+  const k = /** @type {GasKey} */ (Object.hasOwn(CFG.gases, key) ? key : CFG.defaultGas);
   current = k;
   applyGasLabels(k);
-  if (document.body.dataset.state !== "ready") C.setState("loading");
+  if (!loaded.has(k)) { C.stopTicker(); C.setState("loading"); }   // never show one gas's numbers under another's labels
   try {
     const data = await loadGas(k);
+    loaded.add(k);
     if (current !== k) return;   // switched again while loading
     render(data, CFG.gases[k]);
     $("fetched-at").textContent = data.fetchedAt.toLocaleString();
@@ -257,15 +282,20 @@ async function show(key) {
   }
 }
 
-const fromHash = () => (location.hash === "#methane" ? "ch4" : "co2");
+/** The gas whose `hash` matches the URL, or the default. */
+const fromHash = () => /** @type {GasKey} */ (
+  Object.entries(CFG.gases).find(([k, g]) => g.hash && g.hash === location.hash)?.[0] ?? CFG.defaultGas);
+
 document.querySelectorAll(".gas-switch button").forEach((b) => b.addEventListener("click", () => {
-  const gas = /** @type {HTMLElement} */ (b).dataset.gas ?? CFG.defaultGas;
-  history.replaceState(null, "", location.pathname + location.search + (gas === "ch4" ? "#methane" : ""));
-  show(gas);
+  const key = /** @type {HTMLElement} */ (b).dataset.gas ?? CFG.defaultGas;
+  const gas = CFG.gases[/** @type {GasKey} */ (key)];
+  history.replaceState(null, "", location.pathname + location.search + (key === CFG.defaultGas ? "" : gas?.hash ?? ""));
+  show(key);
 }));
 window.addEventListener("hashchange", () => show(fromHash()));
 
 C.wireHelp();
 C.fill("year", YEAR);
-$("retry").addEventListener("click", () => { C.setState("loading"); show(current ?? CFG.defaultGas); });
+$("retry").addEventListener("click", () => { C.setState("loading"); startBudget(); show(current ?? CFG.defaultGas); });
+startBudget();
 show(fromHash());

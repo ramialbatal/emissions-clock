@@ -15,14 +15,14 @@
 
 /**
  * @typedef {{ chart: string, column: string }} Chart
- * @typedef {{ label: string, long: string, unit: string, unitLong: string, note?: string,
+ * @typedef {{ label: string, long: string, unit: string, unitLong: string, note?: string, hash: string,
  *   total: Chart, perCapita: Chart, source: string, sourceUrl: string }} Gas
  * @typedef {{ code: string, flag: string, name?: string, partOf?: string }} Country
  * @typedef {{ label: string, gt: number }} Threshold
  * @typedef {{ chart: string, column: string, from: number, since: number, thresholds: Threshold[],
  *   source: string, sourceUrl: string, paris: { base: number, target: number, cut: number } }} Budget
  * @typedef {{ apiBase: string, gases: Record<"co2" | "ch4", Gas>, budget: Budget, defaultGas: "co2" | "ch4",
- *   historyFrom: number, trendYears: number, world: string, countries: Country[] }} Config
+ *   historyFrom: number, trendYears: number, maxGrowth: number, world: string, countries: Country[] }} Config
  */
 
 /** @type {Config} */
@@ -30,6 +30,7 @@ export default {
   apiBase: "https://ourworldindata.org/grapher/",
   gases: {
     co2: {
+      hash: "",             // URL hash that opens this view ("" = plain URL)
       label: "CO₂", long: "carbon dioxide", unit: "t CO₂", unitLong: "tonnes of CO₂",
       total:     { chart: "annual-co2-emissions-per-country", column: "emissions_total" },
       perCapita: { chart: "co-emissions-per-capita", column: "emissions_total_per_capita" },
@@ -37,6 +38,7 @@ export default {
       sourceUrl: "https://ourworldindata.org/co2-emissions"
     },
     ch4: {
+      hash: "#methane",
       label: "Methane", long: "methane (CH₄)", unit: "t CH₄ (CO₂-eq)", unitLong: "tonnes of methane, as CO₂-equivalent",
       note: "Methane is counted in CO₂-equivalent: the CO₂ that would cause the same warming over 100 years. 1 t of methane ≈ 28 t CO₂-eq.",
       total:     { chart: "methane-emissions", column: "annual_emissions_ch4_total_co2eq" },
@@ -68,6 +70,7 @@ export default {
   defaultGas: "co2",
   historyFrom: 2015,   // first year fetched
   trendYears: 1,       // growth trend = average annual change over the last N years (1 = latest year-on-year change)
+  maxGrowth: 0.2,      // cap on the yearly growth used for projecting (20%): data for some places is two years old
   world: "OWID_WRL",
   countries: [
     { code: "CHN", flag: "🇨🇳" },
