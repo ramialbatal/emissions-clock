@@ -16,7 +16,7 @@
 
 /**
  * @typedef {{ chart: string, column: string }} Chart
- * @typedef {{ label: string, long: string, unit: string, unitLong: string, note?: string, hash: string,
+ * @typedef {{ label: string, inText: string, long: string, unit: string, unitLong: string, note?: string, hash: string,
  *   total: Chart, perCapita: Chart, source: string, sourceUrl: string }} Gas
  * @typedef {{ code: string, flag: string, name?: string, partOf?: string }} Country
  * @typedef {{ label: string, gt: number }} Threshold
@@ -32,7 +32,9 @@ export default {
   gases: {
     co2: {
       hash: "",             // URL hash that opens this view ("" = plain URL)
-      label: "CO₂", long: "carbon dioxide", unit: "t CO₂", unitLong: "tonnes of CO₂",
+      label: "CO₂",
+      inText: "CO₂",         // how the gas is named inside a sentence
+      long: "carbon dioxide", unit: "t CO₂", unitLong: "tonnes of CO₂",
       total:     { chart: "annual-co2-emissions-per-country", column: "emissions_total" },
       perCapita: { chart: "co-emissions-per-capita", column: "emissions_total_per_capita" },
       source: "Global Carbon Project, Global Carbon Budget",
@@ -40,7 +42,8 @@ export default {
     },
     ch4: {
       hash: "#methane",
-      label: "Methane", long: "methane (CH₄)", unit: "t CH₄ (CO₂-eq)", unitLong: "tonnes of methane, as CO₂-equivalent",
+      label: "Methane",
+      inText: "methane", long: "methane (CH₄)", unit: "t CH₄ (CO₂-eq)", unitLong: "tonnes of methane, as CO₂-equivalent",
       note: "Methane is counted in CO₂-equivalent: the CO₂ that would cause the same warming over 100 years. 1 t of methane ≈ 28 t CO₂-eq.",
       total:     { chart: "methane-emissions", column: "annual_emissions_ch4_total_co2eq" },
       perCapita: { chart: "per-capita-methane-emissions", column: "annual_emissions_ch4_total_co2eq_per_capita" },

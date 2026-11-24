@@ -35,3 +35,80 @@ body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; 
 .pace .goal-note { margin-bottom: 12px; }
 .pace .goal-note b { color: var(--text); font-family: var(--mono); }
 #budget-bars .goal-top b { min-width: 3.2em; }
+
+/* ---- Plain-language layout: answer first, details on demand ---------------------------- */
+:root { --ok: #4fd18b; --warn: #ffb347; --tone: var(--bad); }
+[data-tone="ok"] { --tone: var(--ok); }
+[data-tone="warn"] { --tone: var(--warn); }
+[data-tone="bad"] { --tone: var(--bad); }
+
+/* 1. The answer */
+.answer {
+  margin: 24px 0 16px; padding: 26px 22px; text-align: center;
+  border: 1px solid var(--line); border-top: 6px solid var(--tone); border-radius: 16px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) 14%, var(--panel)), var(--panel));
+}
+.answer-icon { margin: 0; font-size: 2.2rem; line-height: 1; }
+.answer-title { margin: 10px 0 6px; font-size: clamp(1.6rem, 5vw, 2.4rem); line-height: 1.15; color: var(--text); }
+.answer-text { margin: 0 auto; max-width: 560px; font-size: 1.08rem; color: #c6d1cd; }
+
+/* 2. The counter, simplified */
+.hero { margin-top: 0; }
+.hero .label { text-transform: none; letter-spacing: 0; font-size: 1rem; }
+.hero .unit b { color: var(--text); font-family: var(--mono); }
+.hero .since { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
+.hero .since b { color: var(--text); font-family: var(--mono); }
+
+/* Fold-outs: "More", "What do these mean?" */
+details.more-info { margin-top: 14px; text-align: left; }
+details.more-info > summary {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none;
+  color: var(--accent-2); font-weight: 600; font-size: .9rem; padding: 6px 12px;
+  border: 1px solid var(--line); border-radius: 999px;
+}
+details.more-info > summary::-webkit-details-marker { display: none; }
+details.more-info > summary::after { content: "▾"; transition: transform .2s; }
+details.more-info[open] > summary::after { transform: rotate(180deg); }
+details.more-info[open] > summary { margin-bottom: 12px; }
+.hero details.more-info { text-align: center; }
+.hero details.more-info p { color: var(--muted); font-size: .92rem; max-width: 640px; margin: 10px auto 0; }
+.hero details.more-info b { color: var(--text); font-family: var(--mono); }
+
+/* 3. Where we stand: traffic-light cards */
+.standing { margin: 0 0 40px; }
+.standing > h2 { margin: 0 0 12px; }
+.status-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.status-card {
+  padding: 18px; background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--tone); border-radius: 14px;
+}
+.sc-label { margin: 0; color: var(--muted); font-size: .85rem; }
+.sc-title { margin: 6px 0 10px; font-size: 1.35rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+.sc-bar { height: 12px; background: var(--line); border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+.sc-bar i { display: block; height: 100%; background: var(--tone); border-radius: 6px; }
+.sc-text { margin: 0; color: #c6d1cd; font-size: .95rem; }
+.standing details.more-info { padding: 0; }
+.standing details.more-info[open] { padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.standing details.more-info > p { color: #c6d1cd; }
+
+/* 4. Countries: badge + one number, the rest behind "More" */
+.badge { margin-left: auto; font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+  color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, transparent); border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent); }
+.badge.ok { --tone: var(--ok); } .badge.warn { --tone: var(--warn); } .badge.bad { --tone: var(--bad); }
+.card .tag + .badge { margin-left: 8px; }
+.legend { margin: -4px 0 14px; color: var(--muted); font-size: .88rem; }
+.legend .badge { margin: 0 4px 0 0; }
+.share { margin: 8px 0 0; color: var(--muted); font-size: .88rem; }
+.card details.more-info { margin-top: 12px; }
+.card details.more-info .spark-wrap { margin: 0 0 6px; text-align: left; }
+
+/* 5. "How we calculate this" folds away */
+details.method > summary { cursor: pointer; list-style: none; }
+details.method > summary::-webkit-details-marker { display: none; }
+details.method > summary h2 { display: inline; margin: 0; font-size: 1.1rem; }
+details.method > summary::after { content: " ▾"; color: var(--muted); }
+details.method[open] > summary::after { content: " ▴"; }
+details.method[open] > summary { margin-bottom: 12px; }
+.grid.collapsed > .card:nth-child(n+7) { display: none; }   /* first six countries until "Show all" */
+.show-all-row { text-align: center; margin: 16px 0 0; }
+.show-all { margin: 0; background: transparent; color: var(--accent-2); border: 1px solid var(--line); border-radius: 999px; padding: 10px 20px; }
+.show-all:hover, .show-all:focus-visible { border-color: var(--accent-2); outline: none; }

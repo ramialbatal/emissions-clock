@@ -30,6 +30,7 @@
       ".goal-num"
     ],
     "verdicts": [
+      "#answer-title",
       "#pace-verdict"
     ],
     "hashes": [
