@@ -39,7 +39,8 @@ emissions used are total CO₂ including land-use change, fetched from Our World
 this year's emissions with a straight-line path to the IPCC's 48% cut from 2019 to 2030. Settings are under `budget` in `js/config.js`.
 
 **Yearly update:** each November the Global Carbon Project publishes a new edition. Update `budget.thresholds`,
-`budget.from` and `budget.source` in `js/config.js` with the new remaining budgets (the page names the edition it uses).
+`budget.from`, `budget.source`, `budget.sourceUrl` and the comment above them in `js/config.js` with the new remaining
+budgets, and the edition and figures in the paragraph above (the page names the edition it uses).
 
 ## Run it and check it
 
@@ -47,6 +48,7 @@ this year's emissions with a straight-line path to the IPCC's 48% cut from 2019 
 npm run serve        # then open http://localhost:8000
 npm install          # dev tools only: TypeScript checker, Playwright, clock-core (types and tests)
 npm run check        # house style + types + unit tests
+npx playwright install chromium   # once, for the smoke test
 npm run smoke        # real browser, real data, desktop and phone
 ```
 

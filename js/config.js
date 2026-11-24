@@ -10,7 +10,8 @@
  *  - CH4: Jones et al., "National contributions to climate change"
  *         (all sources incl. agriculture & land use, in CO2-equivalents)
  *
- * To add a country, add its ISO 3166-1 alpha-3 code (OWID uses OWID_* for aggregates).
+ * To add a country, add { code, flag } to `countries` (ISO 3166-1 alpha-3 code; OWID uses OWID_* for aggregates;
+ * the name comes from the data, or set `name`), then add it to the country list in llms.txt.
  */
 
 /**
@@ -47,8 +48,9 @@ export default {
       sourceUrl: "https://ourworldindata.org/methane-emissions"
     }
   },
-  // UPDATE EVERY NOVEMBER: when the Global Carbon Project publishes its new edition, change
-  // `thresholds` (gt), `from` (start of the year after the edition) and `source` below.
+  // UPDATE EVERY NOVEMBER: when the Global Carbon Project publishes its new edition, change `thresholds` (gt),
+  // `from` (start of the year after the edition), `source`, `sourceUrl` and this comment's figures below,
+  // plus the edition named in README.md.
   // Carbon budget bars (CO2 view). Figures from the Global Carbon Budget 2026 key messages:
   // remaining budgets (50% likelihood) of 150, 510 and 1035 GtCO2 for 1.5, 1.7 and 2 degrees,
   // counted from the start of 2027 (the convention of each yearly edition).

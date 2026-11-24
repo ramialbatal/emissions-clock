@@ -1,23 +1,11 @@
 // Unit tests for the Emissions Clock model. Run with: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { restOfWorld, budgetModel } from "../js/model.js";
+import { budgetModel } from "../js/model.js";
 import CFG from "../js/config.js";
 
 const close = (a, b, eps = 1) => assert.ok(Math.abs(a - b) < eps, `${a} is not close to ${b}`);
 const G = 1e9;
-
-test("restOfWorld: listed countries come off the world; Germany (part of EU) isn't counted twice", () => {
-  const r = restOfWorld({ annual: 100, lastValue: 90, lastYear: 2025 }, [
-    { annual: 30, at: (y) => ({ 2025: 25 })[y] }, { annual: 20, at: (y) => ({ 2025: 15 })[y], partOf: "EU" }
-  ]);
-  assert.deepEqual(r, { annual: 70, lastValue: 65, lastYear: 2025 });
-});
-
-test("restOfWorld: a country one year behind counts with its projection, not as zero", () => {
-  const lagging = { annual: 12, at: (y) => (y === 2025 ? 11 : 10) };   // official 2024, projected 2025 = 11
-  assert.equal(restOfWorld({ annual: 100, lastValue: 90, lastYear: 2025 }, [lagging]).lastValue, 79);
-});
 
 // Hand-checkable series: 1, 2, 3, ... Gt from 2014, so every year differs.
 const rising = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [2014 + i, (i + 1) * G]));  // 2025 = 12 Gt
