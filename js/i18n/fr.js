@@ -90,6 +90,7 @@ export default {
   "cmp.note": "Avec les autres gaz, le total dépasse le réchauffement observé (environ 1,1 à 1,3 °C), car la pollution de l’air (de fines particules) refroidit légèrement la planète et masque une partie du réchauffement. Source : GIEC, sixième rapport d’évaluation (AR6).",
 
   "f.about": "<strong>L’Horloge des émissions</strong> estime la quantité de dioxyde de carbone (CO₂) et de méthane rejetée depuis le début de l’année par le monde et par les pays qui émettent le plus. Elle est mise à jour chaque seconde à partir des données annuelles officielles.",
+  "f.related": "Voir aussi l’<a href=\"https://ramialbatal.github.io/renewables-clock/\">Horloge des renouvelables</a>, l’<a href=\"https://ramialbatal.github.io/jobs-clock/\">Horloge de l’emploi</a>, l’<a href=\"https://ramialbatal.github.io/peace-clock/\">Horloge de la paix</a> et l’<a href=\"https://ramialbatal.github.io/warming-clock/\">Horloge du réchauffement</a> · Fait partie de <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
   "f.links": "Estimations uniquement · données actualisées à chaque visite · <a href=\"https://github.com/ramialbatal/emissions-clock\" rel=\"noopener\">Code source</a>",
 
   "msg.co2.onTrack.t": "Nous sommes sur la bonne voie",
