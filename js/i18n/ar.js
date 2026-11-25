@@ -89,6 +89,7 @@ export default {
   "cmp.note": "مع الغازات الأخرى يتجاوز المجموع الاحترار الذي رصدناه (نحو 1.1 إلى 1.3 درجة مئوية)، لأن تلوث الهواء (الجسيمات الدقيقة) يبرّد الكوكب قليلًا ويخفي جزءًا من الاحترار. المصدر: تقرير التقييم السادس للهيئة الحكومية الدولية المعنية بتغير المناخ.",
 
   "f.about": "<strong>ساعة الانبعاثات</strong> تقدّر كمية ثاني أكسيد الكربون والميثان التي أطلقها العالم والدول الأكثر إطلاقًا للانبعاثات منذ بداية العام، وتُحدَّث كل ثانية بناءً على البيانات السنوية الرسمية.",
+  "f.related": "اطّلع أيضًا على <a href=\"https://ramialbatal.github.io/renewables-clock/\">ساعة الطاقة المتجددة</a> و<a href=\"https://ramialbatal.github.io/jobs-clock/\">ساعة الوظائف</a> و<a href=\"https://ramialbatal.github.io/peace-clock/\">ساعة السلام</a> و<a href=\"https://ramialbatal.github.io/warming-clock/\">ساعة الاحترار</a> · جزء من مشروع <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
   "f.links": "تقديرات فقط · تُجلب البيانات من جديد في كل زيارة · <a href=\"https://github.com/ramialbatal/emissions-clock\" rel=\"noopener\">الشيفرة المصدرية</a>",
 
   "msg.co2.onTrack.t": "نسير على المسار الصحيح",

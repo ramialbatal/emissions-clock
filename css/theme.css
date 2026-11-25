@@ -38,3 +38,6 @@ body[data-gas="co2"] .ch4-only, body[data-gas="ch4"] .co2-only { display: none; 
 
 /* Right to left: warming limits like "1.5°C" keep their order */
 [dir="rtl"] #budget-bars .goal-top b { direction: ltr; unicode-bidi: isolate; }
+
+/* Links to the other clocks in the footer */
+.related { margin-top: 10px; }

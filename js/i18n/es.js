@@ -90,6 +90,7 @@ export default {
   "cmp.note": "Sumado al de otros gases, este calentamiento supera los ~1,1 a 1,3 °C observados, porque la contaminación del aire (partículas diminutas) ha enfriado un poco el planeta y oculta parte del calentamiento. Fuente: Sexto Informe de Evaluación del IPCC (AR6).",
 
   "f.about": "<strong>El Reloj de emisiones</strong> estima cuánto dióxido de carbono (CO₂) y metano han emitido en lo que va de año el mundo y los países que más emiten, actualizado cada segundo a partir de datos anuales oficiales.",
+  "f.related": "Mira también el <a href=\"https://ramialbatal.github.io/renewables-clock/\">Reloj de renovables</a>, el <a href=\"https://ramialbatal.github.io/jobs-clock/\">Reloj del empleo</a>, el <a href=\"https://ramialbatal.github.io/peace-clock/\">Reloj de la paz</a> y el <a href=\"https://ramialbatal.github.io/warming-clock/\">Reloj del calentamiento</a> · Forma parte de <a href=\"https://ramialbatal.github.io/\">AI for things that matter</a>",
   "f.links": "Son estimaciones · los datos se actualizan en cada visita · <a href=\"https://github.com/ramialbatal/emissions-clock\" rel=\"noopener\">Código fuente</a>",
 
   "msg.co2.onTrack.t": "Vamos por buen camino",
