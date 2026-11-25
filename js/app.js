@@ -354,6 +354,5 @@ const scene = C.startScene(document.querySelector("canvas.scene"), emissionsScen
   { groundAt: document.querySelector("header.top") });
 C.wireHelp();
 C.fill("year", YEAR);
-$("retry").addEventListener("click", () => { C.setState("loading"); startBudget(); show(current ?? CFG.defaultGas); });
 startBudget();
 show(fromHash());
